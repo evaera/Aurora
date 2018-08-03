@@ -45,7 +45,7 @@ function Buff.new(buffName, buffInfo, props)
 			local value = rawget(self, k) or props[k] or buffInfo[k]
 
 			if type(value) == "function" then
-				value = value(self)
+				value = value(self) -- TODO: xpcall
 			end
 
 			return value

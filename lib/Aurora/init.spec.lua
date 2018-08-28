@@ -1,10 +1,10 @@
 return function()
-	local Debuffer = require(script.Parent.Debuffer)
+	local Aurora = require(script.Parent)
 
-	describe("Server Debuffer", function()
+	describe("Server Aurora", function()
 		it("Should return the same agent for any given object", function()
-			local agent1 = Debuffer.GetAgent(workspace)
-			local agent2 = Debuffer.GetAgent(workspace)
+			local agent1 = Aurora.GetAgent(workspace)
+			local agent2 = Aurora.GetAgent(workspace)
 
 			expect(agent1).to.equal(agent2)
 		end)

@@ -6,43 +6,41 @@ local t = Resources:LoadLibrary("t")
 
 local IsStudio = RunService:IsStudio()
 
-local BuffStructure = {
+local AuraStructure = {
 	Title = t.string;
 	Description = t.string;
 	Duration = t.number;
 	Visible = t.optional(t.boolean);
 	Replicated = t.optional(t.boolean);
 	MaxStacks = t.optional(t.number);
-	ShouldBuffRefresh = t.optional(t.boolean);
-	Effects = t.optional(t.interface({
-		WalkSpeedMax = t.optional(t.callback);
-	}));
+	ShouldAuraRefresh = t.optional(t.boolean);
+	Effects = t.optional(t.table);
 	Hooks = t.optional(t.interface({
-		BuffAdded = t.optional(t.callback);
-		BuffRemoved = t.optional(t.callback);
-		BuffStackAdded = t.optional(t.callback);
-		BuffStackRemoved = t.optional(t.callback);
-		BuffRefreshed = t.optional(t.callback);
+		AuraAdded = t.optional(t.callback);
+		AuraRemoved = t.optional(t.callback);
+		AuraStackAdded = t.optional(t.callback);
+		AuraStackRemoved = t.optional(t.callback);
+		AuraRefreshed = t.optional(t.callback);
 	}));
 }
 
-local IBuff = t.interface(BuffStructure)
+local IAura = t.interface(AuraStructure)
 
-local Buff = {}
+local Aura = {}
 
-function Buff.new(buffName, buffInfo, props)
-	assert(t.tuple(t.string, t.table, t.table)(buffName, buffInfo, props))
+function Aura.new(auraName, auraInfo, props)
+	assert(t.tuple(t.string, t.table, t.table)(auraName, auraInfo, props))
 
 	local self = setmetatable({
-			Id = buffName;
+			Id = auraName;
 			Stacks = 1;
 		}, {
 		__index = function(self, k)
-			if Buff[k] then
-				return Buff[k]
+			if Aura[k] then
+				return Aura[k]
 			end
 
-			local value = rawget(self, k) or props[k] or buffInfo[k]
+			local value = rawget(self, k) or props[k] or auraInfo[k]
 
 			if type(value) == "function" then
 				value = value(self) -- TODO: xpcall
@@ -53,13 +51,13 @@ function Buff.new(buffName, buffInfo, props)
 	})
 
 	if IsStudio then -- Only run in Studio because this a pretty expensive type check
-		assert(IBuff(self:GetStatic()))
+		assert(IAura(self:GetStatic()))
 
-		-- Manually check that there are no weird keys in the buff info.
+		-- Manually check that there are no weird keys in the aura info.
 		-- This must be done like this because next() won't pick up keys in the hacky way we are doing it
-		for _, key in pairs(buffInfo.__keys) do -- __keys comes from the Immutable module
-			if BuffStructure[key] == nil then
-				error(("Unknown key %q in buff %q."):format(key, buffName), 2)
+		for _, key in pairs(auraInfo.__keys) do -- __keys comes from the Immutable module
+			if AuraStructure[key] == nil then
+				error(("Unknown key %q in aura %q."):format(key, auraName), 2)
 			end
 		end
 	end
@@ -67,7 +65,7 @@ function Buff.new(buffName, buffInfo, props)
 	return self
 end
 
-function Buff:Get(k, default)
+function Aura:Get(k, default)
 	assert(t.tuple(t.string, t.optional(t.any))(k, default))
 	local value = self[k]
 
@@ -82,21 +80,21 @@ function Buff:Get(k, default)
 	return value
 end
 
---- Returns a static representation of the buff
-function Buff:GetStatic()
-	local staticBuff = {}
+--- Returns a static representation of the aura
+function Aura:GetStatic()
+	local staticAura = {}
 
-	for key in pairs(BuffStructure) do
-		staticBuff[key] = self[key]
+	for key in pairs(AuraStructure) do
+		staticAura[key] = self[key]
 	end
 
-	return staticBuff
+	return staticAura
 end
 
-function Buff:FireHook(hookName, ...)
+function Aura:FireHook(hookName, ...)
 	if self.Hooks and self.Hooks[hookName] then
 		return self.Hooks[hookName](self, ...)
 	end
 end
 
-return Buff
+return Aura

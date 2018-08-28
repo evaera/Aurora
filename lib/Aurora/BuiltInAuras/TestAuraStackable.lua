@@ -7,7 +7,7 @@ return {
 	Duration = 10;
 	Visible = true;
 	Replicated = true;
-	ShouldBuffRefresh = true;
+	ShouldAuraRefresh = true;
 	MaxStacks = 3;
 
 	Effects = {

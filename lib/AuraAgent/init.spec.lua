@@ -2,48 +2,48 @@ return function()
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 
-	local Buffs = Resources:LoadLibrary("Buffs")
-	local BuffAgent = require(script.Parent.BuffAgent)
+	local Auras = require(script.Parent.Parent.Aurora).Auras
+	local AuraAgent = require(script.Parent)
 
-	describe("BuffAgent:Apply", function()
-		it("Should apply buffs", function()
-			local agent = BuffAgent.new(workspace, Buffs)
+	describe("AuraAgent:Apply", function()
+		it("Should apply auras", function()
+			local agent = AuraAgent.new(workspace, Auras)
 
-			local success = agent:Apply("TestBuffStandard")
+			local success = agent:Apply("TestAuraStandard")
 
 			expect(success).to.equal(true)
-			expect(agent:Has("TestBuffStandard")).to.equal(true)
-			expect(agent:Get("TestBuffStandard")).to.be.a("table")
-			expect(agent:Get("TestBuffStandard"):Get("Duration")).to.equal(10)
+			expect(agent:Has("TestAuraStandard")).to.equal(true)
+			expect(agent:Get("TestAuraStandard")).to.be.a("table")
+			expect(agent:Get("TestAuraStandard"):Get("Duration")).to.equal(10)
 		end)
 
-		it("Should merge buff info with given props", function()
-			local agent = BuffAgent.new(workspace, Buffs)
+		it("Should merge aura info with given props", function()
+			local agent = AuraAgent.new(workspace, Auras)
 
-			agent:Apply("TestBuffStandard", {
+			agent:Apply("TestAuraStandard", {
 				Title = "Test Title";
 				Description = function(self)
 					return self:Get("Title") .. "!"
 				end
 			})
 
-			local buff = agent:Get("TestBuffStandard")
+			local aura = agent:Get("TestAuraStandard")
 
-			expect(buff:Get("Title")).to.equal("Test Title")
-			expect(buff:Get("Description")).to.equal("Test Title!")
+			expect(aura:Get("Title")).to.equal("Test Title")
+			expect(aura:Get("Description")).to.equal("Test Title!")
 		end)
 
-		it("Should fire the BuffAdded event", function()
-			local agent = BuffAgent.new(workspace, Buffs)
+		it("Should fire the AuraAdded event", function()
+			local agent = AuraAgent.new(workspace, Auras)
 
 			spawn(function()
-				agent:Apply("TestBuffStandard")
+				agent:Apply("TestAuraStandard")
 			end)
 
 			local eventFired = false
-			agent.BuffAdded:Connect(function(buff)
+			agent.AuraAdded:Connect(function(aura)
 				eventFired = true
-				expect(buff.Id).to.equal("TestBuffStandard")
+				expect(aura.Id).to.equal("TestAuraStandard")
 			end)
 
 			wait()
@@ -52,17 +52,17 @@ return function()
 		end)
 	end)
 
-	it("Should fire the BuffRemoved event", function()
-		local agent = BuffAgent.new(workspace, Buffs)
-		agent:Apply("TestBuffStandard")
+	it("Should fire the AuraRemoved event", function()
+		local agent = AuraAgent.new(workspace, Auras)
+		agent:Apply("TestAuraStandard")
 
 		local eventFired = false
-		agent.BuffRemoved:Connect(function(buff)
+		agent.AuraRemoved:Connect(function(aura)
 			eventFired = true
-			expect(buff.Id).to.equal("TestBuffStandard")
+			expect(aura.Id).to.equal("TestAuraStandard")
 		end)
 
-		agent:Remove("TestBuffStandard")
+		agent:Remove("TestAuraStandard")
 
 		wait()
 
@@ -70,42 +70,42 @@ return function()
 	end)
 
 	it("Should refresh duration if re-applied", function()
-		local agent = BuffAgent.new(workspace, Buffs)
-		agent:Apply("TestBuffStandard")
-		local buff1 = agent:Get("TestBuffStandard")
-		agent:Apply("TestBuffStandard")
-		local buff2 = agent:Get("TestBuffStandard")
+		local agent = AuraAgent.new(workspace, Auras)
+		agent:Apply("TestAuraStandard")
+		local aura1 = agent:Get("TestAuraStandard")
+		agent:Apply("TestAuraStandard")
+		local aura2 = agent:Get("TestAuraStandard")
 
-		expect(buff1).never.to.equal(buff2)
-		expect(buff2.Stacks).to.equal(1)
+		expect(aura1).never.to.equal(aura2)
+		expect(aura2.Stacks).to.equal(1)
 	end)
 
-	it("Should stack stackable buffs", function()
-		local agent = BuffAgent.new(workspace, Buffs)
-		agent:Apply("TestBuffStackable")
-		agent:Apply("TestBuffStackable")
-		agent:Apply("TestBuffStackable")
+	it("Should stack stackable auras", function()
+		local agent = AuraAgent.new(workspace, Auras)
+		agent:Apply("TestAuraStackable")
+		agent:Apply("TestAuraStackable")
+		agent:Apply("TestAuraStackable")
 
-		expect(agent:Get("TestBuffStackable").Stacks).to.equal(3)
+		expect(agent:Get("TestAuraStackable").Stacks).to.equal(3)
 	end)
 
-	it("Should fire the BuffStackAdded event", function()
-		local agent = BuffAgent.new(workspace, Buffs)
+	it("Should fire the AuraStackAdded event", function()
+		local agent = AuraAgent.new(workspace, Auras)
 
 		local callCount = 0
-		agent.BuffStackAdded:Connect(function(buff)
+		agent.AuraStackAdded:Connect(function(aura)
 			callCount = callCount + 1
-			expect(buff.Id).to.equal("TestBuffStackable")
-			expect(buff.Stacks).to.equal(callCount + 1)
+			expect(aura.Id).to.equal("TestAuraStackable")
+			expect(aura.Stacks).to.equal(callCount + 1)
 		end)
 
-		agent:Apply("TestBuffStackable")
-		agent:Apply("TestBuffStackable")
-		agent:Apply("TestBuffStackable")
+		agent:Apply("TestAuraStackable")
+		agent:Apply("TestAuraStackable")
+		agent:Apply("TestAuraStackable")
 
 		wait()
 		expect(callCount).to.equal(2)
 	end)
 
-	itSKIP("Should fire lifecycle hooks on the buff")
+	itSKIP("Should fire lifecycle hooks on the aura")
 end

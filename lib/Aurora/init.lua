@@ -2,15 +2,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 
 local Registerable = require(script.Registerable)
-local Auras = Registerable.new("Auras")
-local Effects = Registerable.new("Effects")
 local BuffAgent = Resources:LoadLibrary("AuraAgent")
 
-local Aurora = {}
+local Aurora = {
+	Auras = Registerable.new("Auras");
+	Effects = Registerable.new("Effects");
+}
+
 local Agents = setmetatable({}, {
 	__mode = "k";
 	__index = function(self, instance)
-		local agent = BuffAgent.new(instance, Auras)
+		local agent = BuffAgent.new(instance, Aurora.Auras)
 		self[instance] = agent
 		return agent
 	end
@@ -21,11 +23,11 @@ function Aurora.GetAgent(instance)
 end
 
 function Aurora.RegisterAurasIn(object)
-	Auras:LookIn(object)
+	Aurora.Auras:LookIn(object)
 end
 
 function Aurora.RegisterEffectsIn(object)
-	Effects:LookIn(object)
+	Aurora.Effects:LookIn(object)
 end
 
 spawn(function()
@@ -37,5 +39,8 @@ spawn(function()
 		end
 	end
 end)
+
+Aurora.RegisterAurasIn(script.BuiltInAuras)
+Aurora.RegisterAurasIn(script.BuiltInEffects)
 
 return Aurora

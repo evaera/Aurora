@@ -8,7 +8,7 @@ return {
 	Visible = true;
 	Replicated = true;
 	MaxStacks = 10;
-	ShouldBuffRefresh = true;
+	ShouldAuraRefresh = true;
 
 	Effects = {
 		WalkSpeedMax = function(self)

@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
-local Debug = Resources:LoadLibrary("Debug")
 local t = Resources:LoadLibrary("t")
 
 local IsStudio = RunService:IsStudio()
@@ -24,12 +23,12 @@ local AuraStructure = {
 	}));
 }
 
-local IAura = t.interface(AuraStructure)
+local IAuraDefinition = t.interface(AuraStructure)
 
 local Aura = {}
 
-function Aura.new(auraName, auraInfo, props)
-	assert(t.tuple(t.string, t.table, t.table)(auraName, auraInfo, props))
+function Aura.new(auraName, auraDefinition, props)
+	assert(t.tuple(t.string, t.table, t.table)(auraName, auraDefinition, props))
 
 	local self = setmetatable({
 			Id = auraName;
@@ -40,7 +39,7 @@ function Aura.new(auraName, auraInfo, props)
 				return Aura[k]
 			end
 
-			local value = rawget(self, k) or props[k] or auraInfo[k]
+			local value = rawget(self, k) or props[k] or auraDefinition[k]
 
 			if type(value) == "function" then
 				value = value(self) -- TODO: xpcall
@@ -51,11 +50,11 @@ function Aura.new(auraName, auraInfo, props)
 	})
 
 	if IsStudio then -- Only run in Studio because this a pretty expensive type check
-		assert(IAura(self:GetStatic()))
+		assert(IAuraDefinition(self:GetStatic()))
 
 		-- Manually check that there are no weird keys in the aura info.
 		-- This must be done like this because next() won't pick up keys in the hacky way we are doing it
-		for _, key in pairs(auraInfo.__keys) do -- __keys comes from the Immutable module
+		for _, key in pairs(auraDefinition.__keys) do -- __keys comes from the Immutable module
 			if AuraStructure[key] == nil then
 				error(("Unknown key %q in aura %q."):format(key, auraName), 2)
 			end

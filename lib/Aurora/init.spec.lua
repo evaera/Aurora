@@ -8,5 +8,9 @@ return function()
 
 			expect(agent1).to.equal(agent2)
 		end)
+
+		itSKIP("Should not prevent garbage collection", function()
+
+		end)
 	end)
 end

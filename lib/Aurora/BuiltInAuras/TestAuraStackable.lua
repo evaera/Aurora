@@ -1,18 +1,27 @@
 return {
-	Title = "Movement Speed";
-	Description = function(self)
-		return ("Reduces movement speed by %d%% for %d seconds.")
+	Display = {
+		Title = "Movement Speed";
+		Description = function(self)
+			return ("Reduces movement speed by %d%% for %d seconds.")
 			:format(math.floor(self.Effects.WalkSpeedMax(self) / 16 * 100), self.Duration)
-	end;
-	Duration = 10;
-	Visible = true;
-	Replicated = true;
-	ShouldAuraRefresh = true;
-	MaxStacks = 3;
+		end;
+	};
+
+	Status = {
+		Duration = 10;
+		Visible = true;
+		Replicated = true;
+		ShouldAuraRefresh = true;
+		MaxStacks = 3;
+	};
+
+	Params = {
+		Speed = 10;
+	};
 
 	Effects = {
 		WalkSpeedMax = function(self)
-			return self.Speed or 10
+			return self.Params.Speed or 10
 		end
 	}
 }

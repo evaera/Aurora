@@ -1,7 +1,7 @@
 return {
 	AllowedInstanceTypes = {"Humanoid"};
 
-	Reduce = function (self, values)
+	Reducer = function (self, values)
 		local walkSpeed = math.huge
 
 		for _, maxSpeed in ipairs(values) do

@@ -13,6 +13,14 @@
     "t": {
       "path": "vendor/t/lib",
       "target": "ServerScriptService.Repository.Vendor.t"
+    },
+    "demo.server": {
+      "path": "demo/demo.server.lua",
+      "target": "ServerScriptService.AuroraDemo"
+    },
+    "demo.client": {
+      "path": "demo/demo.client.lua",
+      "target": "StarterPlayer.StarterCharacterScripts.AuroraDemo"
     }
   }
 }

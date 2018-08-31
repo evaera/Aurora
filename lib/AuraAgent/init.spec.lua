@@ -15,23 +15,25 @@ return function()
 			expect(success).to.equal(true)
 			expect(agent:Has("TestAuraStandard")).to.equal(true)
 			expect(agent:Get("TestAuraStandard")).to.be.a("table")
-			expect(agent:Get("TestAuraStandard"):Get("Duration")).to.equal(10)
+			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(10)
 		end)
 
 		it("Should merge aura info with given props", function()
 			local agent = AuraAgent.new(workspace, Auras, Effects)
 
 			agent:Apply("TestAuraStandard", {
-				Title = "Test Title";
-				Description = function(self)
-					return self:Get("Title") .. "!"
-				end
+				Display = {
+					Title = "Test Title";
+					Description = function(self)
+						return self.Display.Title .. "!"
+					end
+				}
 			})
 
 			local aura = agent:Get("TestAuraStandard")
 
-			expect(aura:Get("Title")).to.equal("Test Title")
-			expect(aura:Get("Description")).to.equal("Test Title!")
+			expect(aura.Display.Title).to.equal("Test Title")
+			expect(aura.Display.Description).to.equal("Test Title!")
 		end)
 
 		it("Should fire the AuraAdded event", function()
@@ -60,7 +62,7 @@ return function()
 			local aura2 = agent:Get("TestAuraStandard")
 
 			expect(aura1).never.to.equal(aura2)
-			expect(aura2.Stacks).to.equal(1)
+			expect(aura2.Status.Stacks).to.equal(1)
 		end)
 
 		it("Should stack stackable auras", function()
@@ -69,7 +71,7 @@ return function()
 			agent:Apply("TestAuraStackable")
 			agent:Apply("TestAuraStackable")
 
-			expect(agent:Get("TestAuraStackable").Stacks).to.equal(3)
+			expect(agent:Get("TestAuraStackable").Status.Stacks).to.equal(3)
 		end)
 
 		it("Should fire the AuraStackAdded event", function()
@@ -79,7 +81,7 @@ return function()
 			agent.AuraStackAdded:Connect(function(aura)
 				callCount = callCount + 1
 				expect(aura.Id).to.equal("TestAuraStackable")
-				expect(aura.Stacks).to.equal(callCount + 1)
+				expect(aura.Status.Stacks).to.equal(callCount + 1)
 			end)
 
 			agent:Apply("TestAuraStackable")
@@ -109,7 +111,7 @@ return function()
 	end)
 
 	describe("AuraAgent:Update", function()
-		local testObject = Instance.new("BoolValue")
+		local testObject = Instance.new("BoolValue", game.TestService)
 
 		it("Should update auras when Update is called", function()
 			local agent = AuraAgent.new(testObject, Auras, Effects)
@@ -121,7 +123,7 @@ return function()
 			expect(success).to.equal(true)
 			expect(agent:Has("TestAuraStandard")).to.equal(true)
 			expect(agent:Get("TestAuraStandard")).to.be.a("table")
-			expect(agent:Get("TestAuraStandard"):Get("Duration")).to.equal(9.8)
+			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(9.8)
 			expect(testObject.Name).to.equal("1")
 		end)
 	end)

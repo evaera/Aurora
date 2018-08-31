@@ -38,17 +38,17 @@ function Registerable:Find(name, skipServerCheck)
 	end
 
 	for _, root in ipairs(self.Roots) do
-		local code = root:FindFirstChild(name)
-		if code then
-			local module = require(code)
+		local module = root:FindFirstChild(name, true)
+		if module and module:IsA("ModuleScript") then
+			local export = require(module)
 
 			if serverEquiv then
 				for key, value in pairs(serverEquiv) do
-					module[key] = value
+					export[key] = value
 				end
 			end
 
-			Caches[self][name] = Immutable.Lock(module)
+			Caches[self][name] = Immutable.Lock(export)
 			return Caches[self][name]
 		end
 	end

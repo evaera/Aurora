@@ -44,11 +44,15 @@ local function MakeShadowedSection(aura, definition, props)
 					for key in pairs(self) do
 						keys[key] = true
 					end
-					for key in pairs(props[section]) do
-						keys[key] = true
+					if props[section] then
+						for key in pairs(props[section]) do
+							keys[key] = true
+						end
 					end
-					for key in pairs(definition[section]) do
-						keys[key] = true
+					if definition[section] then
+						for key in pairs(definition[section]) do
+							keys[key] = true
+						end
 					end
 					return keys
 				end
@@ -119,7 +123,7 @@ function Aura.new(auraName, auraDefinition, props)
 
 		-- Manually check that there are no weird keys in the aura info.
 		-- This must be done like this because next() won't pick up keys in the hacky way we are doing it
-		for _, key in pairs(auraDefinition.__keys) do -- __keys comes from the Immutable module
+		for key in pairs(auraDefinition.__keys) do -- __keys comes from the Immutable module
 			if AuraStructure[key] == nil then
 				error(("Unknown key %q in aura %q."):format(key, auraName), 2)
 			end

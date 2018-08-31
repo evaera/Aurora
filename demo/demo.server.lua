@@ -10,9 +10,12 @@ local function hookCharacter(character)
 		local agent = Aurora.GetAgent(humanoid)
 
 		wait(2)
-		agent:Apply("Movement")
+		agent:Apply("Movement", {
+			Status = {
+				Duration = 2;
+			}
+		})
 		wait(2)
-		agent:Remove("Movement")
 	end
 end
 
@@ -36,5 +39,5 @@ wAgent:Apply("TestAuraStackable", {
 	};
 	Params = {
 		Text = "Hello there";
-	}
+	};
 })

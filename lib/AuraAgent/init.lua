@@ -9,6 +9,7 @@ local Effect = require(script.BaseEffect)
 local Util = require(script.Util)
 
 local Default = Util.Default
+local IsServer = RunService:IsServer()
 local IsClient = RunService:IsServer() == false -- allow to run in old play solo
 
 local AuraAgent = {
@@ -208,9 +209,9 @@ end
 -- Reduce duration and remove expired auras
 function AuraAgent:CullAuras(dt)
 	for name, aura in pairs(self.ActiveAuras) do
-		aura.Status.Duration = aura.Status.Duration - dt
+		aura.Status.Duration = math.max(aura.Status.Duration - dt, 0)
 
-		if aura.Status.Duration <= 0 then
+		if IsServer and aura.Status.Duration <= 0 then
 			self:Remove(name, "EXPIRED")
 		end
 	end

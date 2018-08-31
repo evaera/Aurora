@@ -25,7 +25,7 @@ function Effect.new(effectName, effectDefinition, agent)
 	if IsStudio then
 		assert(IEffectDefinition(effectDefinition))
 
-		for _, key in pairs(effectDefinition.__keys) do -- __keys comes from the Immutable module
+		for key in pairs(effectDefinition.__keys) do -- __keys comes from the Immutable module
 			if EffectStructure[key] == nil then
 				error(("Unknown key %q in aura %q."):format(key, effectName), 2)
 			end

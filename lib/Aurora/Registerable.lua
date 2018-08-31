@@ -43,8 +43,8 @@ function Registerable:Find(name, skipServerCheck)
 			local export = require(module)
 
 			if serverEquiv then
-				for key, value in pairs(serverEquiv) do
-					export[key] = value
+				for key in pairs(serverEquiv.__keys) do
+					export[key] = serverEquiv[key]
 				end
 			end
 

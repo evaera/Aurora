@@ -8,7 +8,7 @@ function Immutable.Lock(Table)
 			if k == "__keys" then
 				local keys = {}
 				for key in pairs(Table) do
-					keys[#keys + 1] = key
+					keys[key] = true
 				end
 				return keys
 			end

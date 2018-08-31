@@ -253,6 +253,8 @@ Whether or not this Aura is allowed to refresh its duration when a new stack is 
 
 Auras also have "Hooks", which are lifecycle methods directly attached to a specific Aura, rather than an Effect. Hooks could be used for things like playing a specific sound when the Aura is applied or removed or showing a notice on a player's screen. However, they shouldn't be used to modify the game world.
 
+Note: Hooks do not fire during the initial world snapshot playback when a player joins the game, so that the player is not flooded with messages and/or sounds.
+
 #### AuraAdded
 #### AuraRemoved
 #### AuraRefreshed

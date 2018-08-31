@@ -16,6 +16,7 @@ return {
 
 	Params = {
 		Speed = 10;
+		Test = 59;
 	};
 
 	Effects = {

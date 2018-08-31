@@ -39,11 +39,12 @@ function AuraAgent.new(instance, auras, effects, syncCallback)
 		Janitor = Janitor.new();
 		Changed = Signal.new();
 		ActiveAuras = {};
-		ActiveEffects = {}; -- TODO
+		ActiveEffects = {};
 		Destroyed = false;
 		TimeInactive = 0;
 		SyncCallback = syncCallback;
-		IncomingReplication = nil;
+		IncomingReplication = false;
+		DisableHooks = false;
 	}
 	setmetatable(self, AuraAgent)
 
@@ -72,7 +73,7 @@ function AuraAgent:Apply(auraName, props)
 	CheckClient(self)
 	assert(t.tuple(t.string, t.optional(t.table))(auraName, props))
 
-	props = props or {}
+	props = props or {} -- todo type check props
 
 	local auraDefinition = self.AuraList:Find(auraName)
 	if not auraDefinition then
@@ -81,7 +82,9 @@ function AuraAgent:Apply(auraName, props)
 
 	local aura = Aura.new(auraName, auraDefinition, props)
 
-	self:Sync("Apply", auraName, Util.Staticize(aura, Aura.PruneNonReplicatedSections(props)))
+	if Default(aura.Status.Replicated, true) then
+		self:Sync("Apply", auraName, Util.Staticize(aura, Aura.PruneNonReplicatedSections(props)))
+	end
 
 	if self.ActiveAuras[auraName] then
 		local oldAura = self.ActiveAuras[auraName]
@@ -96,23 +99,25 @@ function AuraAgent:Apply(auraName, props)
 				aura.Status.Stacks = (oldAura.Status.Stacks or 1) + 1
 				self.ActiveAuras[auraName] = aura
 
-				aura:FireHook("AuraRefreshed")
+				self:FireHook(aura, "AuraRefreshed")
 				self.AuraRefreshed:Fire(aura, oldAura)
 			else
 				oldAura.Stacks = (oldAura.Stacks or 1) + 1
 			end
 
-			aura:FireHook("AuraStackAdded")
+			self:FireHook(aura, "AuraStackAdded")
 			self.AuraStackAdded:Fire(aura)
 			return true
 		elseif Default(aura.Status.ShouldAuraRefresh, true) then
-			aura:FireHook("AuraRefreshed")
+			self:FireHook(aura, "AuraRefreshed")
 			self.AuraRefreshed:Fire(aura, oldAura)
 		else
 			return false
 		end
 	else
-		aura:FireHook("AuraAdded")
+		if not self.IncomingReplication then -- Don't fire AuraAdded during a sync
+			self:FireHook(aura, "AuraAdded")
+		end
 		self.AuraAdded:Fire(aura)
 	end
 
@@ -128,13 +133,25 @@ function AuraAgent:Remove(auraName, cause)
 
 	cause = cause or "REMOVED"
 
-	self:Sync("Remove", auraName)
+	local aura = self:Get(auraName)
 
-	if self:Has(auraName) then
-		self.ActiveAuras[auraName]:FireHook("AuraRemoved", cause)
+	if aura then
+		if Default(aura.Status.Replicated, true) then
+			self:Sync("Remove", auraName, cause)
+		end
+
+		self:FireHook(self.ActiveAuras[auraName], "AuraRemoved", cause)
 		self.AuraRemoved:Fire(self.ActiveAuras[auraName], cause)
 		self.ActiveAuras[auraName] = nil
 		return true
+	end
+
+	return false
+end
+
+function AuraAgent:FireHook(aura, ...)
+	if not self.DisableHooks then
+		aura:FireHook(...)
 	end
 end
 
@@ -172,10 +189,17 @@ end
 
 function AuraAgent:Snapshot()
 	CheckDestroy(self)
+
+	if self.TimeInactive > 0 then
+		return nil -- return nil when there's nothing to snapshot
+	end
+
 	local snapshot = {}
 
 	for name, aura in pairs(self.ActiveAuras) do
-		snapshot[name] = aura:Snapshot()
+		if Default(aura.Status.Replicated, true) then
+			snapshot[name] = aura:Snapshot()
+		end
 	end
 
 	return snapshot
@@ -234,7 +258,7 @@ function AuraAgent:ReifyEffects()
 					end
 				end
 
-				self.ActiveEffects[effectName] = Effect.new(effectName, effectDefinition, self) -- todo: xpcall to prevent yielding
+				self.ActiveEffects[effectName] = Effect.new(effectName, effectDefinition, self)
 			end
 		end
 	end

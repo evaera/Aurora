@@ -4,7 +4,6 @@ local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 
 local Registerable = require(script.Registerable)
 local AuraAgent = Resources:LoadLibrary("AuraAgent")
-local t = Resources:LoadLibrary("t")
 
 local SyncEvent = Resources:GetRemoteEvent(".Aurora")
 local SyncFunction = Resources:GetRemoteFunction(".Aurora")
@@ -20,6 +19,7 @@ local Aurora = {
 	SafeMemoryMode = true;
 	MaxAgentTimeInactive = math.huge;
 	SyncActionIndex = -1;
+	InitialSyncCompleted = IsServer;
 }
 
 local Agents = setmetatable({}, {
@@ -63,14 +63,37 @@ end
 --- Creates a snapshot of every agent's auras as they are in this moment
 -- to be sent to a newly connected client (agents with no auras are excluded)
 function Aurora.Snapshot()
+	local snapshot = {}
 	for instance, agent in pairs(Agents) do
+		local agentSnapshot = agent:Snapshot()
 
+		if agentSnapshot then
+			snapshot[#snapshot + 1] = {
+				Instance = instance;
+				Auras = agentSnapshot;
+			}
+		end
 	end
+	return snapshot
 end
 
 -- Event connections
 
-if IsClient then
+if IsServer then
+	local lastRequest = {}
+	SyncFunction.OnServerInvoke = function (player)
+		-- rate limit
+		if lastRequest[player] and tick() - lastRequest[player] < 60 then
+			return nil
+		end
+		lastRequest[player] = tick()
+
+		return Aurora.Snapshot()
+	end
+	game:GetService("Players").PlayerRemoving:Connect(function(player)
+		lastRequest[player] = nil
+	end)
+else
 	require(script.ClientNetwork)(Aurora)
 end
 

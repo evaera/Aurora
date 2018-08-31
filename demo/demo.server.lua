@@ -11,7 +11,6 @@ local function hookCharacter(character)
 
 		wait(2)
 		agent:Apply("Movement")
-		print(agent:Has("Movement"))
 		wait(2)
 		agent:Remove("Movement")
 	end
@@ -28,3 +27,14 @@ game.Players.PlayerAdded:Connect(hookPlayer)
 for _, player in ipairs(game.Players:GetPlayers()) do
 	hookPlayer(player)
 end
+
+local wAgent = Aurora.GetAgent(workspace)
+wAgent:Apply("TestAuraStackable", {
+	Effects = {};
+	Status = {
+		Duration = math.huge;
+	};
+	Params = {
+		Text = "Hello there";
+	}
+})

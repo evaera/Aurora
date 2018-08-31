@@ -39,6 +39,20 @@ local function MakeShadowedSection(aura, definition, props)
 	return function (section)
 		return {
 			__index = function (self, k)
+				if k == "__keys" then -- make this not bad later
+					local keys = {}
+					for key in pairs(self) do
+						keys[key] = true
+					end
+					for key in pairs(props[section]) do
+						keys[key] = true
+					end
+					for key in pairs(definition[section]) do
+						keys[key] = true
+					end
+					return keys
+				end
+
 				local value = rawget(self, k)
 				if value == nil and props[section] then
 					value = props[section][k]
@@ -132,7 +146,7 @@ function Aura:Snapshot()
 	local static = {}
 
 	for section in pairs(self.ReplicatedSections) do
-		static[section] = Util.Staticize(self, self[section], AuraStructure[section])
+		static[section] = Util.Staticize(self, self[section], self[section].__keys)
 	end
 
 	return static

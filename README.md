@@ -66,10 +66,3 @@ Effects are made up of three functions: a `constructor`, a `destructor`, and a `
 ## Replication
 
 `Server/client stuff goes here...`
-
-## Next
-
-- get networking done
-- consider organizing data / display properties
-- test hooks
-- figure out what else needs done

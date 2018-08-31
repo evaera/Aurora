@@ -16,6 +16,9 @@ return function()
 			expect(agent:Has("TestAuraStandard")).to.equal(true)
 			expect(agent:Get("TestAuraStandard")).to.be.a("table")
 			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(10)
+			expect(agent:Get("TestAuraStandard").ReplicatedSections.Status).to.equal(true)
+			expect(agent:Get("TestAuraStandard").ReplicatedSections.Display).to.never.be.ok()
+			expect(agent:Get("TestAuraStandard").ReplicatedSections.Params).to.never.be.ok()
 		end)
 
 		it("Should merge aura info with given props", function()
@@ -27,6 +30,13 @@ return function()
 					Description = function(self)
 						return self.Display.Title .. "!"
 					end
+				};
+				Status = {
+					Duration = math.huge;
+					Visible = false;
+				};
+				Params = {
+					Speed = 11;
 				}
 			})
 
@@ -34,13 +44,28 @@ return function()
 
 			expect(aura.Display.Title).to.equal("Test Title")
 			expect(aura.Display.Description).to.equal("Test Title!")
+			expect(aura.Status.Duration).to.equal(math.huge)
+			expect(aura.Status.Visible).to.equal(false)
+			expect(aura.Params.Speed).to.equal(11)
+			expect(aura.Params.Test).to.equal(59)
+			expect(aura.ReplicatedSections.Status).to.equal(true)
+			expect(aura.ReplicatedSections.Display).to.equal(true)
+			expect(aura.ReplicatedSections.Status).to.equal(true)
+			expect(aura.ReplicatedSections.Params).to.equal(true)
 		end)
 
-		it("Should fire the AuraAdded event", function()
+		it("Should fire the AuraAdded event and hook", function()
 			local agent = AuraAgent.new(workspace, Auras, Effects)
 
+			local hookCalled = false
 			spawn(function()
-				agent:Apply("TestAuraStandard")
+				agent:Apply("TestAuraStandard", {
+					Hooks = {
+						AuraAdded = function()
+							hookCalled = true
+						end
+					}
+				})
 			end)
 
 			local eventFired = false
@@ -51,7 +76,8 @@ return function()
 
 			wait()
 
-			expect(eventFired).to.be.ok()
+			expect(eventFired).to.equal(true)
+			expect(hookCalled).to.equal(true)
 		end)
 
 		it("Should refresh duration if re-applied", function()
@@ -93,9 +119,16 @@ return function()
 		end)
 	end)
 
-	it("Should fire the AuraRemoved event", function()
+	it("Should fire the AuraRemoved event and hook", function()
 		local agent = AuraAgent.new(workspace, Auras, Effects)
-		agent:Apply("TestAuraStandard")
+		local hookCalled = false
+		agent:Apply("TestAuraStandard", {
+			Hooks = {
+				AuraRemoved = function()
+					hookCalled = true
+				end
+			}
+		})
 
 		local eventFired = false
 		agent.AuraRemoved:Connect(function(aura)
@@ -108,6 +141,7 @@ return function()
 		wait()
 
 		expect(eventFired).to.equal(true)
+		expect(hookCalled).to.equal(true)
 	end)
 
 	describe("AuraAgent:Update", function()
@@ -127,7 +161,4 @@ return function()
 			expect(testObject.Name).to.equal("1")
 		end)
 	end)
-
-
-	itSKIP("Should fire lifecycle hooks on the aura")
 end

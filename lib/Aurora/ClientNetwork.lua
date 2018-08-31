@@ -1,9 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
+local Debug = Resources:LoadLibrary("Debug")
 
 local NetworkTypes = require(script.Parent.NetworkTypes)
 
 local SyncEvent = Resources:GetRemoteEvent(".Aurora")
+local SyncFunction = Resources:GetRemoteFunction(".Aurora")
 
 return function (Aurora)
 	-- AuroraClientNetwork
@@ -34,6 +37,35 @@ return function (Aurora)
 		end
 	end
 
+	function AuroraClientNetwork.SyncEverything()
+		local snapshot = SyncFunction:InvokeServer()
+		assert(NetworkTypes.ISnapshotShallow(snapshot))
+
+		print("Snapshot:", Debug.Inspect(snapshot))
+
+		for _, agentPayload in pairs(snapshot) do
+			local ok, warning = NetworkTypes.ISnapshotPayload(agentPayload)
+
+			if ok then
+				local agent = Aurora.GetAgent(agentPayload.Instance)
+
+				agent.IncomingReplication = true
+				agent.DisableHooks = true
+
+				for auraName, props in pairs(agentPayload.Auras) do
+					agent:Apply(auraName, props)
+				end
+
+				agent.DisableHooks = false
+				agent.IncomingReplication = false
+			else
+				warn(warning) -- debug
+			end
+		end
+
+		Aurora.InitialSyncCompleted = true
+	end
+
 	-- Handlers
 
 	function AuroraClientNetwork.Handlers.SyncAction(payload)
@@ -43,7 +75,9 @@ return function (Aurora)
 		local agent = Aurora.GetAgent(payload.Instance)
 		agent.IncomingReplication = true -- tell agent to skip client checks
 		agent[payload.Method](agent, unpack(payload.Args))
-		agent.IncomingReplication = nil
+		agent.IncomingReplication = false
+
+		print("Playback: ", payload.Instance:GetFullName(), payload.Method, Debug.Inspect(payload.Args))
 	end
 
 	-- Event connections
@@ -63,4 +97,8 @@ return function (Aurora)
 		AuroraClientNetwork.ActionBuffer[data.ActionIndex] = data
 		AuroraClientNetwork.CheckBuffer()
 	end)
+
+	-- Sync everything
+
+	spawn(AuroraClientNetwork.SyncEverything)
 end

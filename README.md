@@ -1,5 +1,3 @@
-Current Status: Active work in progress, do not use yet.
-
 # Aurora
 
 **Aurora** is a library that can manage status Effects (known as "Auras") in your Roblox game.

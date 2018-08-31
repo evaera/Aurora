@@ -8,7 +8,6 @@ local AuraAgent = Resources:LoadLibrary("AuraAgent")
 local SyncEvent = Resources:GetRemoteEvent(".Aurora")
 local SyncFunction = Resources:GetRemoteFunction(".Aurora")
 local IsServer = RunService:IsServer()
-local IsClient = RunService:IsClient()
 
 -- Library
 
@@ -45,6 +44,14 @@ end
 
 function Aurora.SetTickRate(seconds)
 	Aurora.TickRate = seconds
+end
+
+function Aurora.SetSafeMemoryMode(mode)
+	Aurora.SafeMemoryMode = mode
+end
+
+function Aurora.SetMaxAgentTimeInactive(seconds)
+	Aurora.MaxAgentTimeInactive = seconds
 end
 
 function Aurora.SyncAction(agent, method, ...)

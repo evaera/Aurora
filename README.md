@@ -1,16 +1,20 @@
+Current status: Functional and ready for real world tests. You may encounter bugs.
+
 # Aurora
 
-**Aurora** is a library that can manage status Effects (known as "Auras") in your Roblox game.
+**Aurora** is a library that can manage status effects (known as "Auras") in your Roblox game. These Auras are much akin to "buffs" and "debuffs" as seen in many games.
 
-Using Aurora can help you stay sane while managing complex game state when multiple parts of your game need to keep track or change the same resource.
+Using Aurora can help you stay sane while managing complex game state when multiple parts of your game need to keep track of or change the same resource.
+
+Aurora is made for and requires [RoStrap](https://rostrap.github.io/), a light weight module management system.
 
 ## Example use case
 
-A classic example of the problem that Aurora aims to solve is changing the player's walk speed. Let's say you have a heavy weapon that you want to slow the player down when he equips it. That's easy enough, you just set the walk speed when the weapon is equipped, and set it back to default when the weapon is unequiped.
+A classic example of the problem that Aurora aims to solve is changing the player's walk speed. Let's say you have a heavy weapon that you want to have slow down the player when he equips it. That's easy enough, you just set the walk speed when the weapon is equipped, and set it back to default when the weapon is unequipped.
 
-But, what if you want something else to change the player's walk speed as well, potentially at the same time? For example, in addition to the heavy weapon, say the player could equip a shield which also slows them down a bit. If we follow the same flow as when we implemented the logic for the heavy weapon above, we now have a problem: The player can equip both the heavy weapon and the shield, and then unequip the heavy weapon. Now, the player can walk around at full speed with a shield up, when they should still be slowed!
+But what if you want something else to change the player's walk speed as well, potentially at the same time? For example, in addition to the heavy weapon, say the player could equip a shield which also slows them down a bit. If we follow the same flow as when we implemented the logic for the heavy weapon above, we now have a problem: The player can equip both the heavy weapon and the shield, and then unequip the heavy weapon. Now, the player can walk around at full speed with a shield up when they should still be slowed!
 
-Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide a movement-speed altering *Effect*, each of which can have different intensities. Then, every update cycle, Aurora will group all similar *Effects*, and feed all of their values into a reducer function. In this case, the function will find the lowest value from all of the Effects, and then set the player's WalkSpeed to that number.
+Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide the movement speed altering *Effect*, each of which can have different intensities. Then, every update cycle, Aurora will group all similar *Effects* and feed all of their values into a reducer function. In this case, the function will find the lowest value from all of the Effects, and then set the player's WalkSpeed to that number.
 
 Now, there is only one source of truth for the player's WalkSpeed, which solves all of our problems. When there are no longer any Auras that provide the walk speed Effect, Aurora will clean up by setting the player's walk speed back to default.
 
@@ -18,7 +22,7 @@ Of course, this is only one example of what Aurora can be used for. Auras can be
 
 ## House rules
 
-- All properties should always be treated as **read-only**. There is nothing in the library stopping you from changing a property, but you may experience unexpected or unwanted behavior if you do, and your code may be broken by future releases.
+- All properties should always be treated as **read-only**. There is nothing in the library stopping you from changing a property, but you may experience unexpected or unwanted behavior if you do and your code may be broken by future releases.
 - Classes have more methods and properties than are documented in this file, but they should serve no significant purpose to the end developer. If you use undocumented members, you may experience unexpected behavior and your code may be broken by future releases.
 
 ## Library
@@ -37,7 +41,7 @@ Returns the Agent for the given instance. Each instance will only ever have one 
 Registers the given instance as a container where ModuleScripts returning Aura definitions are kept. 
 
 ##### Structure and search strategy
-The ModuleScript must have the same name as the Aura. Auras are lazy-loaded: the first time an aura is applied, it is matched with a recursive `FindFirstChild` call for every registered Aura container until it's found, and then it is cached. Feel free to nest folders organizing your auras, but be aware that *folder names* must also be unique with all module names. If a non-ModuleScript instance is returned from that root, then it will be discarded and will continue searching in other roots (if there are any).
+The ModuleScript must have the same name as the Aura. Auras are lazy-loaded: the first time an Aura is applied, it is matched with a recursive `FindFirstChild` call for every registered Aura container until it's found, and then it is cached. Feel free to nest folders organizing your Auras, but be aware that *folder names* must also be unique with all module names. If a non-ModuleScript instance is returned from that root, then it will be discarded and will continue searching in other roots (if there are any).
 
 ##### Server shadowing
 ModuleScripts under the container with an Aura name affixed with "Server" (case-sensitive) will also be automatically loaded and its top-level section keys will be applied *on top of* the table members exported by the base Aura ModuleScript. This optional feature is only active on the server; even if a "Server"-affixed module is replicated to the client, it will not be loaded.
@@ -53,7 +57,7 @@ The default value is `0.5` seconds.
 #### Aurora.SetMaxAgentTimeInactive(seconds: number): void
 Sets how long, in seconds, that an Agent can exist without any Auras before it is automatically destroyed on the next update cycle. You should set this if you intend to have a large number of instances with Auras that remain in the game world for a long time. This feature will make the inital Aurora snapshot sent to newly joined players less expensive, make the update cycle slightly less expensive, and free up memory.
 
-This is a potentially dangerous feature. If enabled, then you must take care to always call `Aurora.GetAgent` after your code yields (WaitForChild, wait, even listeners, etc). If you hold on to a reference to an old agent, then in addition to leaking memory, your code will error because you can't call methods on destroyed Agents.
+This is a potentially dangerous feature. If enabled, then you must take care to always call `Aurora.GetAgent` after your code yields (WaitForChild, wait, event listeners, etc). If you hold on to a reference to an old agent, then in addition to leaking memory, your code will error because you can't call methods on destroyed Agents.
 
 The default value is `math.huge` (disabled).
 
@@ -106,7 +110,7 @@ If an Aura is not stackable, or if it is already at maximum stacks, it will inst
 If an Aura is not stackable, or if it's already at maximum stacks, and `ShouldAuraRefresh` is false, then nothing will happen, and the method will return `false`. Under all other circumstances, `true` will be returned.
 
 #### Agent:Remove(auraName: string, reason?: string): boolean
-Removes the Aura of the given name from this Agent. If the given aura is defined as being replicated, then this method will also mirror over to all clients.
+Removes the Aura of the given name from this Agent. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
 
 `reason` is optional, and is sent along with the "AuraRemoved" event and hook. By default, the reason is `"REMOVED"` (unless the Aura is removed automatically due to expiration, in which case it is `"EXPIRED"`).
 
@@ -131,8 +135,6 @@ Destroys this Agent, rendering it unusable. All events will be disconnected, Eff
 ### Properties
 #### Agent.Instance: Instance
 The instance that this Agent is attached to. 
-
-#### Agent.Instance: Instance
 
 ### Events
 
@@ -214,6 +216,9 @@ The `Status` section may only have specific properties inside, but `Params` and 
 ### Properties
 
 Aura properties are all loaded from the Aura definition, overshadowed by any Props specific to this Aura.
+
+#### Aura.Id: string
+The name of this Aura.
 
 #### Aura.Display: dictionary
 A dictionary where you could include display-related properties such as:
@@ -322,7 +327,7 @@ return {
 
 ## Replication
 
-When a player joins the game, a snapshot of every `Status.Replicated` Aura from every Agent on the server is created, serialized, and sent to the player. The player then re-creates the entire world state on their end.
+When a player joins the game, a snapshot of every Aura with `Status.Replicated` set to `true` from every Agent on the server is created, serialized, and sent to the player. The player then re-creates the entire world state on their end.
 
 Once a player is connected, all changes (Auras being applied or removed) to replicated Auras are mirrored to all clients in the game. Each client runs its own version of the world, decreasing duration on Auras and updating effects.
 

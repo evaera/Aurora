@@ -32,12 +32,12 @@ The main Aurora library provides access to Agents, registering custom containers
 Note that these methods must be called from both your client and server code. Calling a method from this main library on the server will not change anything on the client, and vice-versa. (This is not the case for Agent methods, which are mirrored on clients.)
 
 ### Methods
-#### Aurora.GetAgent(instance: Instance): Agent
+#### `Aurora.GetAgent(instance: Instance): Agent`
 Returns the Agent for the given instance. Each instance will only ever have one Agent, and this method will keep track of created Agents. 
 
 * If the previous Agent is Destroyed, either manually or due to configured settings, then a new one will be created.
 
-#### Aurora.RegisterAurasIn(instance: Instance): void
+#### `Aurora.RegisterAurasIn(instance: Instance): void`
 Registers the given instance as a container where ModuleScripts returning Aura definitions are kept. 
 
 ##### Structure and search strategy
@@ -46,22 +46,22 @@ The ModuleScript must have the same name as the Aura. Auras are lazy-loaded: the
 ##### Server shadowing
 ModuleScripts under the container with an Aura name affixed with "Server" (case-sensitive) will also be automatically loaded and its top-level section keys will be applied *on top of* the table members exported by the base Aura ModuleScript. This optional feature is only active on the server; even if a "Server"-affixed module is replicated to the client, it will not be loaded.
 
-#### Aurora.RegisterEffectsIn(instance: Instance): void
+#### `Aurora.RegisterEffectsIn(instance: Instance): void`
 See *RegisterAurasIn* just above. Everything is exactly the same. Except, of course, that ModuleScripts inside these containers must export Effects, not Auras.
 
-#### Aurora.SetTickRate(seconds: number): void
+#### `Aurora.SetTickRate(seconds: number): void`
 Sets how often, in seconds, that all Auras and Effects will be updated. "Updating" in this context refers to lowering remaining duration on Auras, removing expired Auras, and most importantly calling the "Reducer" method on Effects.
 
 The default value is `0.5` seconds.
 
-#### Aurora.SetMaxAgentTimeInactive(seconds: number): void
+#### `Aurora.SetMaxAgentTimeInactive(seconds: number): void`
 Sets how long, in seconds, that an Agent can exist without any Auras before it is automatically destroyed on the next update cycle. You should set this if you intend to have a large number of instances with Auras that remain in the game world for a long time. This feature will make the inital Aurora snapshot sent to newly joined players less expensive, make the update cycle slightly less expensive, and free up memory.
 
 This is a potentially dangerous feature. If enabled, then you must take care to always call `Aurora.GetAgent` after your code yields (WaitForChild, wait, event listeners, etc). If you hold on to a reference to an old agent, then in addition to leaking memory, your code will error because you can't call methods on destroyed Agents.
 
 The default value is `math.huge` (disabled).
 
-#### Aurora.SetSafeMemoryMode(isSafeMode: boolean): void
+#### `Aurora.SetSafeMemoryMode(isSafeMode: boolean): void`
 Under "Safe Memory Mode", if an Agent's associated Instance is not a descendant of the DataModel (`game`, or the *game tree*) then that Agent will be automatically destroyed so as to prevent memory leaks.
 
 Agents being attached to an instance *will* prevent that instance from being garbage collected automatically if it's just detached from the game tree (parent set to `nil`). However, if the instance (or an ancestor of that instance) is destroyed, then the Agent and instance will be correctly garbage collected, even if "Safe Memory Mode" is off.
@@ -71,16 +71,16 @@ This is an important consideration, because not all instances are destroyed auto
 If you are willing to take on the responsibility of ensuring everything you attach Auras to are properly destroyed (e.g. destroying characters after the player dies manually), then it's safe to turn this off. Otherwise, for most applications it's safer to keep this at the default (on).
 
 ### Properties
-#### Aurora.TickRate: number
+#### `Aurora.TickRate: number`
 The current update cycle tick rate; see *SetTickRate*.
 
-#### Aurora.MaxAgentTimeInactive: number
+#### `Aurora.MaxAgentTimeInactive: number`
 The current maximum time an Agent may be inactive before being destroyed, see *SetMaxAgentTimeInactive*.
 
-#### Aurora.SafeMemoryMode: boolean
+#### `Aurora.SafeMemoryMode: boolean`
 Whether or not "Safe Memory Mode" is enabled, see *SetSafeMemoryMode*.
 
-#### Aurora.InitialSyncCompleted: boolean
+#### `Aurora.InitialSyncCompleted: boolean`
 When a player first joins a server, a *snapshot* of every replicated Aura on every Agent is created and sent to that player. The client will then re-create the Agents and Auras it received. After this process has been completed, `InitialSyncCompleted` will be `true`. On the server, it is always `true`.
 
 ## Agents
@@ -90,7 +90,7 @@ An Agent is an object that keeps track of Auras and Effects on behalf of the Ins
 Agents also handle updating the state of each Aura attached to it, which happens every update cycle. The frequency of the update cycle is configurable by the developer.
 
 ### Methods
-#### Agent:Apply(auraName: string, props?: dictionary): boolean
+#### `Agent:Apply(auraName: string, props?: dictionary): boolean`
 Creates a new Aura of the given name under this Agent. Because Auras are lazy-loaded, this method call will be the first time your Aura definition is validated. If the given aura is defined as being replicated, then this method will also mirror over to all clients.
 
 ##### Props
@@ -109,40 +109,40 @@ If an Aura is not stackable, or if it is already at maximum stacks, it will inst
 
 If an Aura is not stackable, or if it's already at maximum stacks, and `ShouldAuraRefresh` is false, then nothing will happen, and the method will return `false`. Under all other circumstances, `true` will be returned.
 
-#### Agent:Remove(auraName: string, reason?: string): boolean
+#### `Agent:Remove(auraName: string, reason?: string): boolean`
 Removes the Aura of the given name from this Agent. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
 
 `reason` is optional, and is sent along with the "AuraRemoved" event and hook. By default, the reason is `"REMOVED"` (unless the Aura is removed automatically due to expiration, in which case it is `"EXPIRED"`).
 
 Returns `true` if an Aura was actually removed, `false` if nothing happened because the Aura didn't exist on this Agent.
 
-#### Agent:Has(auraName: string): boolean
+#### `Agent:Has(auraName: string): boolean`
 Returns `true` if an Aura of the given name is currently applied to this Agent, `false` otherwise.
 
-#### Agent:Get(auraName: string): Aura
+#### `Agent:Get(auraName: string): Aura`
 Returns the Aura of the given name if it's currently applied to this Agent, `nil` otherwise.
 
 Do not store the return value from this method for long, because Auras can be created and destroyed quickly. Storing this value or trapping it in a closure will cause memory leaks.
 
-#### Agent:GetAuras(): array<Aura>
+#### `Agent:GetAuras(): array<Aura>`
 Returns an array of all Auras currently applied to this Agent.
 
 Do not store the return values from this method for long, because Auras can be created and destroyed quickly. Storing these values or trapping them in a closure will cause memory leaks.
 
-#### Agent:Destroy(): void
+#### `Agent:Destroy(): void`
 Destroys this Agent, rendering it unusable. All events will be disconnected, Effects will be deconstructed, Auras will be removed, it will no longer be updated or kept in memory internally, and calling any further methods on this Agent will raise an error.
 
 ### Properties
-#### Agent.Instance: Instance
+#### `Agent.Instance: Instance`
 The instance that this Agent is attached to. 
 
 ### Events
 
-#### AuraAdded (aura: Aura)
-#### AuraRemoved (auraName: string)
-#### AuraRefreshed (newAura: Aura, oldAura: Aura)
-#### AuraStackAdded (aura: Aura)
-#### AuraStackRemoved (aura: Aura)
+#### `AuraAdded (aura: Aura)`
+#### `AuraRemoved (auraName: string)`
+#### `AuraRefreshed (newAura: Aura, oldAura: Aura)`
+#### `AuraStackAdded (aura: Aura)`
+#### `AuraStackRemoved (aura: Aura)`
 
 ## Auras
 
@@ -152,7 +152,7 @@ Auras can be applied to any Instance (e.g. a Player, a player's Character, or an
 
 Auras have a "definition", which is a ModuleScript that returns a table containing known properties. You should put your Auras in a folder (nesting allowed), and then call `Aurora.RegisterAurasIn` with the folder. See *RegisterAurasIn* for more details on how the matching process works.
 
-In Aura and Effect definitions, every property value is expected to be a static (serializable) value. In every case, a function is also acceptable in place of a value, but the function must **never yield**, must **have no side effects**, and **return the expected type** for the property. The function is passed one argument, which is the Aura itself.
+In Aura definitions, every property value is expected to be a static (serializable) value. In every case, a function is also acceptable in place of a value, but the function must **never yield**, must **have no side effects**, and **return the expected type** for the property. The function is passed one argument, which is the Aura itself.
 
 The definition is split into sections, each containing a different type of information. A sample Movement Speed Aura definition is provided below:
 
@@ -191,6 +191,12 @@ return {
     AnotherEffect = 50;
     -- In either case, these values (the number of stacks, and 50) will be sent
     -- to the Effect Reducer function.
+  };
+  
+  Hooks = {
+    AuraAdded = function()
+      print("Encumbered added! Maybe this could play a sound.")
+    end;
   }
 }
 ```
@@ -217,41 +223,41 @@ The `Status` section may only have specific properties inside, but `Params` and 
 
 Aura properties are all loaded from the Aura definition, overshadowed by any Props specific to this Aura.
 
-#### Aura.Id: string
+#### `Aura.Id: string`
 The name of this Aura.
 
-#### Aura.Display: dictionary
+#### `Aura.Display: dictionary`
 A dictionary where you could include display-related properties such as:
 
 - Title
 - Description
 - Icon
 
-#### Aura.Params: dictionary
+#### `Aura.Params: dictionary`
 An optional dictionary where you should include any parameters for effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
 
-#### Aura.Effects: dictionary
+#### `Aura.Effects: dictionary`
 A dictionary containing the Effect values/functions for this Aura.
 
-#### Aura.Status: dictionary
+#### `Aura.Status: dictionary`
 A dictionary containing the state used by Aurora internally (which can also be referenced by your own code)
 
-#### Aura.Status.Duration: number
+#### `Aura.Status.Duration: number`
 The number of seconds remaining on this Aura.
 
-#### Aura.Status.Stacks: number
+#### `Aura.Status.Stacks: number`
 The number of stacks that this Aura has. This always starts at `1`, even for unstackable Auras.
 
-#### Aura.Status.Visible?: boolean
+#### `Aura.Status.Visible?: boolean`
 Whether or not this Aura should be visible to the player (such as on a UI)
 
-#### Aura.Status.Replicated?: boolean
+#### `Aura.Status.Replicated?: boolean`
 If true, this Aura will be sent to all clients. Otherwise, it will only exist on the server.
 
-#### Aura.Status.MaxStacks?: number
+#### `Aura.Status.MaxStacks?: number`
 The maximum number of stacks this Aura can reach.
 
-#### Aura.Status.ShouldAuraRefresh?: boolean
+#### `Aura.Status.ShouldAuraRefresh?: boolean`
 Whether or not this Aura is allowed to refresh its duration when a new stack is applied (or if unstackable, when it is applied again).
 
 ### Hooks
@@ -260,11 +266,11 @@ Auras also have "Hooks", which are lifecycle methods directly attached to a spec
 
 Note: Hooks do not fire during the initial world snapshot playback when a player joins the game, so that the player is not flooded with messages and/or sounds.
 
-#### AuraAdded
-#### AuraRemoved
-#### AuraRefreshed
-#### AuraStackAdded
-#### AuraStackRemoved
+#### `AuraAdded`
+#### `AuraRemoved`
+#### `AuraRefreshed`
+#### `AuraStackAdded`
+#### `AuraStackRemoved`
 
 ## Effects 
 

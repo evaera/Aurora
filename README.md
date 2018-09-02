@@ -108,7 +108,7 @@ The `Effects` section is an exception to this system. If `Effects` is included a
 * Note: Snapshot serialization currently acts differently from mirror serialization; snapshot serialization works per-section, whereas if an Aura is applied when a client is already connected it works per-property. This will definitely be changed to be per-property in the future so that there are no disagreements between clients.
 
 ##### Stacks and refreshes
-If an Aura is stackable and isn't at its `MaxStacks` value, then a new stack will be added to this Aura. This will fire the "AuraStackAdded" event instead of "AuraAdded". If the `ShouldAuraRefresh` property is true, then the old Aura is replaced with the new one (which implicitly also resets the duration to full). If `ShoudlAuraRefresh` is false, then the old Aura is retained (which implicitly retains the same duration).
+If an Aura is stackable and isn't at its `MaxStacks` value, then a new stack will be added to this Aura. This will fire the "AuraStackAdded" event instead of "AuraAdded". If the `ShouldAuraRefresh` property is true, then the old Aura is replaced with the new one (which implicitly also resets the duration to full). If `ShouldAuraRefresh` is false, then the old Aura is retained (which implicitly retains the same duration).
 
 If an Aura is not stackable, or if it is already at maximum stacks, it will instead "refresh" the Aura if it is allowed. This means that the old Aura is replaced with the new one, and the "AuraRefreshed" event will be fired instead of "AuraAdded".
 

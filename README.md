@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="assets/Aurora.png" alt="Aurora" height="150" />
+    <img src="assets/Aurora.png" alt="Aurora" height="139" />
 </div>
 
 

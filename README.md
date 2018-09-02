@@ -1,4 +1,9 @@
-Current status: Functional and ready for real world tests. You may encounter bugs.
+<div align="center">
+    <img src="assets/Aurora.png" alt="Aurora" height="150" />
+</div>
+
+
+Current status: Functional and ready for real world tests. You may encounter bugs. GitHub issues for bugs are appreciated.
 
 # Aurora
 
@@ -18,7 +23,7 @@ Aurora solves this problem correctly by allowing you to apply a movement speed A
 
 Now, there is only one source of truth for the player's WalkSpeed, which solves all of our problems. When there are no longer any Auras that provide the walk speed Effect, Aurora will clean up by setting the player's walk speed back to default.
 
-Of course, this is only one example of what Aurora can be used for. Auras can be used for tracking player state (such as marking a player as "infected" in a zombie game), modifying combat values (such as +10% damage), and as a means of communicating modifiers to the player directly (by directly displaying what Auras a player has on their screen).
+Of course, this is only one example of what Aurora can be used for. Auras can be used for tracking player state (such as marking a player as "infected" in a zombie game), modifying combat values (such as +10% damage for the next 10 seconds), and as a means of communicating modifiers to the player directly (by directly displaying what Auras a player has on their screen).
 
 ## House rules
 
@@ -29,13 +34,13 @@ Of course, this is only one example of what Aurora can be used for. Auras can be
 
 The main Aurora library provides access to Agents, registering custom containers for your Auras and Effects, and changing global settings.
 
-Note that these methods must be called from both your client and server code. Calling a method from this main library on the server will not change anything on the client, and vice-versa. (This is not the case for Agent methods, which are mirrored on clients.)
+Note that these methods must be called from both your client and server code. Calling a method from this main library on the server will not change anything on the client, and vice-versa. (This is not the case for Agent methods, which are mirrored to clients.)
 
 ### Methods
 #### `Aurora.GetAgent(instance: Instance): Agent`
 Returns the Agent for the given instance. Each instance will only ever have one Agent, and this method will keep track of created Agents. 
 
-* If the previous Agent is Destroyed, either manually or due to configured settings, then a new one will be created.
+* If the previous Agent is destroyed, either manually or due to configured settings, then a new one will be created.
 
 #### `Aurora.RegisterAurasIn(instance: Instance): void`
 Registers the given instance as a container where ModuleScripts returning Aura definitions are kept. 
@@ -44,7 +49,7 @@ Registers the given instance as a container where ModuleScripts returning Aura d
 The ModuleScript must have the same name as the Aura. Auras are lazy-loaded: the first time an Aura is applied, it is matched with a recursive `FindFirstChild` call for every registered Aura container until it's found, and then it is cached. Feel free to nest folders organizing your Auras, but be aware that *folder names* must also be unique with all module names. If a non-ModuleScript instance is returned from that root, then it will be discarded and will continue searching in other roots (if there are any).
 
 ##### Server shadowing
-ModuleScripts under the container with an Aura name affixed with "Server" (case-sensitive) will also be automatically loaded and its top-level section keys will be applied *on top of* the table members exported by the base Aura ModuleScript. This optional feature is only active on the server; even if a "Server"-affixed module is replicated to the client, it will not be loaded.
+ModuleScripts under the container with an Aura name appended with "Server" (case-sensitive) will also be automatically loaded and its top-level section keys will be applied *on top of* the table members exported by the base Aura ModuleScript. This optional feature is only active on the server; even if a "Server"-appended module is replicated to the client, it will not be loaded.
 
 #### `Aurora.RegisterEffectsIn(instance: Instance): void`
 See *RegisterAurasIn* just above. Everything is exactly the same. Except, of course, that ModuleScripts inside these containers must export Effects, not Auras.
@@ -57,12 +62,12 @@ The default value is `0.5` seconds.
 #### `Aurora.SetMaxAgentTimeInactive(seconds: number): void`
 Sets how long, in seconds, that an Agent can exist without any Auras before it is automatically destroyed on the next update cycle. You should set this if you intend to have a large number of instances with Auras that remain in the game world for a long time. This feature will make the inital Aurora snapshot sent to newly joined players less expensive, make the update cycle slightly less expensive, and free up memory.
 
-This is a potentially dangerous feature. If enabled, then you must take care to always call `Aurora.GetAgent` after your code yields (WaitForChild, wait, event listeners, etc). If you hold on to a reference to an old agent, then in addition to leaking memory, your code will error because you can't call methods on destroyed Agents.
+This is a potentially dangerous feature. If enabled, then you must take care to always call `Aurora.GetAgent` after your code yields (WaitForChild, wait, event listeners, etc). If you hold on to a reference to an old Agent, then in addition to leaking memory, your code will error because you can't call methods on destroyed Agents.
 
 The default value is `math.huge` (disabled).
 
 #### `Aurora.SetSafeMemoryMode(isSafeMode: boolean): void`
-Under "Safe Memory Mode", if an Agent's associated Instance is not a descendant of the DataModel (`game`, or the *game tree*) then that Agent will be automatically destroyed so as to prevent memory leaks.
+Under "Safe Memory Mode", if an Agent's associated Instance is not a descendant of the DataModel (i.e. `game`, or the *game tree*) then that Agent will be automatically destroyed so as to prevent memory leaks.
 
 Agents being attached to an instance *will* prevent that instance from being garbage collected automatically if it's just detached from the game tree (parent set to `nil`). However, if the instance (or an ancestor of that instance) is destroyed, then the Agent and instance will be correctly garbage collected, even if "Safe Memory Mode" is off.
 
@@ -75,23 +80,23 @@ If you are willing to take on the responsibility of ensuring everything you atta
 The current update cycle tick rate; see *SetTickRate*.
 
 #### `Aurora.MaxAgentTimeInactive: number`
-The current maximum time an Agent may be inactive before being destroyed, see *SetMaxAgentTimeInactive*.
+The current maximum time an Agent may be inactive before being destroyed; see *SetMaxAgentTimeInactive*.
 
 #### `Aurora.SafeMemoryMode: boolean`
-Whether or not "Safe Memory Mode" is enabled, see *SetSafeMemoryMode*.
+Whether or not "Safe Memory Mode" is enabled; see *SetSafeMemoryMode*.
 
 #### `Aurora.InitialSyncCompleted: boolean`
 When a player first joins a server, a *snapshot* of every replicated Aura on every Agent is created and sent to that player. The client will then re-create the Agents and Auras it received. After this process has been completed, `InitialSyncCompleted` will be `true`. On the server, it is always `true`.
 
 ## Agents
 
-An Agent is an object that keeps track of Auras and Effects on behalf of the Instance that it is linked to. When it comes time to apply, remove, or otherwise alter the Auras that are applied to a specific Instance, you do so through its Agent. Each Instance will only ever have one Agent, and the Aurora library will be sure to keep track of this for you and always return the same one when called on the same Instance.
+An Agent is an object that keeps track of Auras and Effects on behalf of the Instance that it is linked to. When it comes time to apply, remove, or otherwise alter the Auras that are applied to a specific Instance, you do so through its Agent. Each Instance will only ever have one Agent, and the Aurora library will be sure to keep track of this for you and always return the same one when called on the same Instance (unless the previous one was destroyed).
 
 Agents also handle updating the state of each Aura attached to it, which happens every update cycle. The frequency of the update cycle is configurable by the developer.
 
 ### Methods
 #### `Agent:Apply(auraName: string, props?: dictionary): boolean`
-Creates a new Aura of the given name under this Agent. Because Auras are lazy-loaded, this method call will be the first time your Aura definition is validated. If the given aura is defined as being replicated, then this method will also mirror over to all clients.
+Creates a new Aura of the given name under this Agent. Because Auras are lazy-loaded, this method call will be the first time your Aura definition is validated. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
 
 ##### Props
 `props` is an optional table dictionary, in which you can override properties from the Aura definition. *Props* must always contain at least one sub-dictionary, because Aura definitions are split into several section dictionaries, as can be seen under *Auras* below. Only the section properties you list here explicitly will be overridden; section properties you omit from Props will still fall back to the section properties from the definition.
@@ -234,7 +239,7 @@ A dictionary where you could include display-related properties such as:
 - Icon
 
 #### `Aura.Params: dictionary`
-An optional dictionary where you should include any parameters for effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
+An optional dictionary where you should include any parameters for Effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
 
 #### `Aura.Effects: dictionary`
 A dictionary containing the Effect values/functions for this Aura.
@@ -287,9 +292,9 @@ Effects are made up of three functions: a `Constructor`, a `Destructor`, and a `
 
 ```lua
 return {
-  -- Optional, limit the types of instances that this effect can be applied to.
-  -- Aurora will produce a warning if an effect is applied to an improper instance
-  -- type, and the effect wil be discarded.
+  -- Optional, limit the types of instances that this Effect can be applied to.
+  -- Aurora will produce a warning if an Effect is applied to an improper instance
+  -- type, and the Effect wil be discarded.
   -- Uses :IsA comparison.
   AllowedInstanceTypes = {"Humanoid"};
 
@@ -335,7 +340,7 @@ return {
 
 When a player joins the game, a snapshot of every Aura with `Status.Replicated` set to `true` from every Agent on the server is created, serialized, and sent to the player. The player then re-creates the entire world state on their end.
 
-Once a player is connected, all changes (Auras being applied or removed) to replicated Auras are mirrored to all clients in the game. Each client runs its own version of the world, decreasing duration on Auras and updating effects.
+Once a player is connected, all changes (Auras being applied or removed) to replicated Auras are mirrored to all clients in the game. Each client runs its own version of the world, decreasing duration on Auras and updating Effects.
 
 All mirrored messages are played back on the client in order. There is a message buffer in the client network system that will hold onto messages that arrive out of order and play them all back correctly so that the server and client should always agree on the world state.
 

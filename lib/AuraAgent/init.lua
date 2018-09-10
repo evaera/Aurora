@@ -238,9 +238,9 @@ end
 -- Reduce duration and remove expired auras
 function AuraAgent:CullAuras(dt)
 	for name, aura in pairs(self.ActiveAuras) do
-		aura.Status.Duration = math.max(aura.Status.Duration - dt, 0)
+		aura.Status.TimeLeft = math.max(aura.Status.TimeLeft - dt, 0)
 
-		if IsServer and aura.Status.Duration <= 0 then
+		if IsServer and aura.Status.TimeLeft <= 0 then
 			self:Remove(name, "EXPIRED")
 		end
 	end

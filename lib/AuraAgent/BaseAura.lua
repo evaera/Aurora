@@ -103,13 +103,15 @@ function Aura.new(auraName, auraDefinition, props)
 	}, Aura)
 
 	local sectionIndex = MakeShadowedSection(self, auraDefinition, props)
-	self.Status = setmetatable({
-		Stacks = 1;
-	}, sectionIndex("Status"))
+	self.Status = setmetatable({}, sectionIndex("Status"))
 	self.Display = setmetatable({}, sectionIndex("Display"))
 	self.Params = setmetatable({}, sectionIndex("Params"))
 	self.Hooks = setmetatable({}, sectionIndex("Hooks"))
 	self.Effects = props.Effects or auraDefinition.Effects -- must be iterable, so apply no shadowing.
+
+	-- Default values
+	self.Status.Stacks = 1
+	self.Status.TimeLeft = self.Status.Duration
 
 	-- keep track of which sections we need to send in snapshot
 	for key in pairs(props) do

@@ -191,12 +191,15 @@ return function()
 
 			local success = agent:Apply("TestAuraStandard")
 
+			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(10)
+
 			agent:Update(0.2)
 
 			expect(success).to.equal(true)
 			expect(agent:Has("TestAuraStandard")).to.equal(true)
 			expect(agent:Get("TestAuraStandard")).to.be.a("table")
-			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(9.8)
+			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(9.8)
+			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(10)
 			expect(testObject.Name).to.equal("1")
 		end)
 	end)

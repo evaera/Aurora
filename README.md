@@ -259,6 +259,9 @@ A dictionary containing the Effect values/functions for this Aura.
 A dictionary containing the state used by Aurora internally (which can also be referenced by your own code)
 
 #### `Aura.Status.Duration: number`
+The original duration of this Aura in seconds.
+
+#### `Aura.Status.TimeLeft: number`
 The number of seconds remaining on this Aura.
 
 #### `Aura.Status.Stacks: number`

@@ -1,8 +1,6 @@
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
-local Immutable = Resources:LoadLibrary("Immutable")
+local Immutable = require(script.Parent.Immutable)
 
 local IsServer = RunService:IsServer()
 

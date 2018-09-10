@@ -1,7 +1,4 @@
 return function()
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
-
 	local Auras = require(script.Parent.Parent.Aurora).Auras
 	local Effects = require(script.Parent.Parent.Aurora).Effects
 	local AuraAgent = require(script.Parent)

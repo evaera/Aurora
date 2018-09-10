@@ -12,5 +12,13 @@ return function()
 		itSKIP("Should not prevent garbage collection", function()
 
 		end)
+
+		it("Should not return destroyed agents", function()
+			local agent = Aurora.GetAgent(workspace)
+
+			agent:Destroy()
+
+			expect(Aurora.GetAgent(workspace).Destroyed).to.never.equal(true)
+		end)
 	end)
 end

@@ -31,7 +31,14 @@ local Agents = setmetatable({}, {
 })
 
 function Aurora.GetAgent(instance)
-	return Agents[instance]
+	local agent = Agents[instance]
+
+	if not agent.Destroyed then
+		return agent
+	else
+		Agents[instance] = nil
+		return Agents[instance]
+	end
 end
 
 function Aurora.RegisterAurasIn(object)

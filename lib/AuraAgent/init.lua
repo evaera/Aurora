@@ -128,10 +128,38 @@ function AuraAgent:Apply(auraName, props)
 	return true
 end
 
+function AuraAgent:Consume(auraName, cause)
+	CheckDestroy(self)
+	CheckClient(self)
+	assert(t.tuple(t.string, t.optional(t.string))(auraName, cause))
+
+	cause = cause or "CONSUMED"
+
+	local aura = self:Get(auraName)
+
+	if aura then
+		self:FireHook(aura, "AuraStackRemoved", cause)
+		self.AuraStackRemoved:Fire(aura, cause)
+
+		if aura.Status.Stacks == 1 then
+			return self:Remove(auraName, cause)
+		end
+
+		if Default(aura.Status.Replicated, true) then
+			self:Sync("Consume", auraName, cause)
+		end
+
+		aura.Status.Stacks = aura.Status.Stacks - 1
+		return true
+	end
+
+	return false
+end
+
 function AuraAgent:Remove(auraName, cause)
 	CheckDestroy(self)
 	CheckClient(self)
-	assert(t.tuple(t.string)(auraName))
+	assert(t.tuple(t.string, t.optional(t.string))(auraName, cause))
 
 	cause = cause or "REMOVED"
 
@@ -142,7 +170,7 @@ function AuraAgent:Remove(auraName, cause)
 			self:Sync("Remove", auraName, cause)
 		end
 
-		self:FireHook(self.ActiveAuras[auraName], "AuraRemoved", cause)
+		self:FireHook(aura, "AuraRemoved", cause)
 		self.AuraRemoved:Fire(self.ActiveAuras[auraName], cause)
 		self.ActiveAuras[auraName] = nil
 		return true

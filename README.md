@@ -60,7 +60,7 @@ Sets how often, in seconds, that all Auras and Effects will be updated. "Updatin
 The default value is `0.5` seconds.
 
 #### `Aurora.SetMaxAgentTimeInactive(seconds: number): void`
-Sets how long, in seconds, that an Agent can exist without any Auras before it is automatically destroyed on the next update cycle. You should set this if you intend to have a large number of instances with Auras that remain in the game world for a long time. This feature will make the inital Aurora snapshot sent to newly joined players less expensive, make the update cycle slightly less expensive, and free up memory.
+Sets how long, in seconds, that an Agent can exist without any Auras before it is automatically destroyed on the next update cycle. You should set this if you intend to have a large number of instances with Auras that remain in the game world for a long time. This feature will make the initial Aurora snapshot sent to newly joined players less expensive, make the update cycle slightly less expensive, and free up memory.
 
 This is a potentially dangerous feature. If enabled, then you must take care to always call `Aurora.GetAgent` after your code yields (WaitForChild, wait, event listeners, etc). If you hold on to a reference to an old Agent, then in addition to leaking memory, your code will error because you can't call methods on destroyed Agents.
 
@@ -114,12 +114,23 @@ If an Aura is not stackable, or if it is already at maximum stacks, it will inst
 
 If an Aura is not stackable, or if it's already at maximum stacks, and `ShouldAuraRefresh` is false, then nothing will happen, and the method will return `false`. Under all other circumstances, `true` will be returned.
 
-#### `Agent:Remove(auraName: string, reason?: string): boolean`
+#### `Agent:Remove(auraName: string, reason = "REMOVED"): boolean`
 Removes the Aura of the given name from this Agent. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
+
+Fires the `AuraRemoved` event and hook.
 
 `reason` is optional, and is sent along with the "AuraRemoved" event and hook. By default, the reason is `"REMOVED"` (unless the Aura is removed automatically due to expiration, in which case it is `"EXPIRED"`).
 
 Returns `true` if an Aura was actually removed, `false` if nothing happened because the Aura didn't exist on this Agent.
+
+#### `Agent:Consume(auraName: string, reason = "CONSUMED"): boolean`
+Consumes a stack from the Aura of the given name. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
+
+Fires the `AuraStackRemoved` event and hook. If the Aura only has one stack, the `AuraRemoved` event and hook will *also* be fired.
+
+`reason` is optional, and is sent along with the "AuraRemoved" event and hook. By default, the reason is `"CONSUMED"`.
+
+Returns `true` if an Aura was actually consumed, `false` if nothing happened because the Aura didn't exist on this Agent.
 
 #### `Agent:Has(auraName: string): boolean`
 Returns `true` if an Aura of the given name is currently applied to this Agent, `false` otherwise.

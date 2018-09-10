@@ -65,7 +65,8 @@ local function MakeShadowedSection(aura, definition, props)
 					value = definition[section][k]
 				end
 
-				if type(value) == "function" then
+				-- Don't pre-emptively call "Hooks" because they aren't the same as other functions
+				if type(value) == "function" and section ~= "Hooks" then
 					value = value(aura)
 				end
 

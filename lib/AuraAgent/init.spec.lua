@@ -115,32 +115,73 @@ return function()
 			wait()
 			expect(callCount).to.equal(2)
 		end)
-	end)
 
-	it("Should fire the AuraRemoved event and hook", function()
-		local agent = AuraAgent.new(workspace, Auras, Effects)
-		local hookCalled = false
-		agent:Apply("TestAuraStandard", {
-			Hooks = {
-				AuraRemoved = function()
-					hookCalled = true
-				end
-			}
-		})
+		it("Should fire the AuraRemoved event and hook", function()
+			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local hookCalled = false
+			agent:Apply("TestAuraStandard", {
+				Hooks = {
+					AuraRemoved = function()
+						hookCalled = true
+					end
+				}
+			})
 
-		local eventFired = false
-		agent.AuraRemoved:Connect(function(aura)
-			eventFired = true
-			expect(aura.Id).to.equal("TestAuraStandard")
+			local eventFired = false
+			agent.AuraRemoved:Connect(function(aura)
+				eventFired = true
+				expect(aura.Id).to.equal("TestAuraStandard")
+			end)
+
+			expect(agent:Remove("TestAuraStandard")).to.equal(true)
+			expect(agent:Remove("TestAuraStandard")).to.equal(false)
+
+			wait()
+
+			expect(eventFired).to.equal(true)
+			expect(hookCalled).to.equal(true)
 		end)
 
-		agent:Remove("TestAuraStandard")
+		it("Should fire AuraStackRemoved when consumed", function()
+			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local timesStackRemovedHook = 0
+			local timesRemovedHook = 0
+			agent:Apply("TestAuraStackable")
+			agent:Apply("TestAuraStackable", { Hooks = {
+				AuraStackRemoved = function ()
+					timesStackRemovedHook = timesStackRemovedHook + 1
+				end;
+				AuraRemoved = function ()
+					timesRemovedHook = timesRemovedHook + 1
+				end;
+			}})
 
-		wait()
+			local timesStackRemovedFired = 0
+			local timesRemovedFired = 0
 
-		expect(eventFired).to.equal(true)
-		expect(hookCalled).to.equal(true)
+			agent.AuraStackRemoved:Connect(function(aura)
+				timesStackRemovedFired = timesStackRemovedFired + 1
+				expect(aura.Id).to.equal("TestAuraStackable")
+			end)
+
+			agent.AuraRemoved:Connect(function(aura)
+				timesRemovedFired = timesRemovedFired + 1
+				expect(aura.Id).to.equal("TestAuraStackable")
+			end)
+
+			expect(agent:Consume("TestAuraStackable")).to.equal(true)
+			expect(agent:Consume("TestAuraStackable")).to.equal(true)
+			expect(agent:Consume("TestAuraStackable")).to.equal(false)
+
+			wait()
+
+			expect(timesStackRemovedHook).to.equal(2)
+			expect(timesRemovedHook).to.equal(1)
+			expect(timesStackRemovedFired).to.equal(2)
+			expect(timesRemovedFired).to.equal(1)
+		end)
 	end)
+
 
 	describe("AuraAgent:Update", function()
 		local testObject = Instance.new("BoolValue", game.TestService)

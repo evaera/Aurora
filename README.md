@@ -124,7 +124,7 @@ Returns `true` if an Aura was actually removed, `false` if nothing happened beca
 #### `Agent:Has(auraName: string): boolean`
 Returns `true` if an Aura of the given name is currently applied to this Agent, `false` otherwise.
 
-#### `Agent:Get(auraName: string): Aura`
+#### `Agent:Get(auraName: string): Aura?`
 Returns the Aura of the given name if it's currently applied to this Agent, `nil` otherwise.
 
 Do not store the return value from this method for long, because Auras can be created and destroyed quickly. Storing this value or trapping it in a closure will cause memory leaks.

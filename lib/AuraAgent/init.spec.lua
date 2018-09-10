@@ -96,6 +96,7 @@ return function()
 			agent:Apply("TestAuraStackable")
 			agent:Apply("TestAuraStackable")
 			agent:Apply("TestAuraStackable")
+			agent:Apply("TestAuraStackable")
 
 			expect(agent:Get("TestAuraStackable").Status.Stacks).to.equal(3)
 		end)

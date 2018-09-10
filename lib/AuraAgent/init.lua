@@ -111,6 +111,7 @@ function AuraAgent:Apply(auraName, props)
 			return true
 		elseif Default(aura.Status.ShouldAuraRefresh, true) then
 			self:FireHook(aura, "AuraRefreshed")
+			aura.Status.Stacks = oldAura.Status.Stacks
 			self.AuraRefreshed:Fire(aura, oldAura)
 		else
 			return false

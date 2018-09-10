@@ -105,8 +105,6 @@ These custom Props will also be sent to clients to ensure proper replication. Yo
 
 The `Effects` section is an exception to this system. If `Effects` is included as a Prop then that table will completely replace the `Effects` table from the definition, they will not be merged as with other sections. It is recommended to not override the `Effects` section, but rather override properties in the `Params` section, and then have your Effects in your Aura Definition be dynamic based on values from the Params. This can be seen in action under "Auras" below.
 
-* Note: Snapshot serialization currently acts differently from mirror serialization; snapshot serialization works per-section, whereas if an Aura is applied when a client is already connected it works per-property. This will definitely be changed to be per-property in the future so that there are no disagreements between clients.
-
 ##### Stacks and refreshes
 If an Aura is stackable and isn't at its `MaxStacks` value, then a new stack will be added to this Aura. This will fire the "AuraStackAdded" event instead of "AuraAdded". If the `ShouldAuraRefresh` property is true, then the old Aura is replaced with the new one (which implicitly also resets the duration to full). If `ShouldAuraRefresh` is false, then the old Aura is retained (which implicitly retains the same duration).
 

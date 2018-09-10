@@ -20,13 +20,13 @@ AuraAgent.__index = AuraAgent
 
 local function CheckDestroy(agent)
 	if agent.Destroyed then
-		error("Cannot call actions on a destroyed AuraAgent", 3)
+		error("[Aurora] Cannot call actions on a destroyed AuraAgent", 3)
 	end
 end
 
 local function CheckClient(agent)
 	if IsClient and not agent.IncomingReplication then
-		error("Cannot modify auras from the client", 3)
+		error("[Aurora] Cannot modify auras from the client", 3)
 	end
 end
 
@@ -78,13 +78,13 @@ function AuraAgent:Apply(auraName, props)
 
 	local auraDefinition = self.AuraList:Find(auraName)
 	if not auraDefinition then
-		return warn(("Attempt to apply invalid aura %q to %s"):format(auraName, self.Instance:GetFullName()))
+		return warn(("[Aurora] Attempt to apply invalid aura %q to %s"):format(auraName, self.Instance:GetFullName()))
 	end
 
 	local aura = Aura.new(auraName, auraDefinition, props)
 
 	if Default(aura.Status.Replicated, true) then
-		self:Sync("Apply", auraName, Util.Staticize(aura, Aura.PruneNonReplicatedSections(props)))
+		self:Sync("Apply", auraName, aura:Snapshot())
 	end
 
 	if self.ActiveAuras[auraName] then
@@ -268,7 +268,7 @@ function AuraAgent:ReifyEffects()
 			if not self.ActiveEffects[effectName] then
 				local effectDefinition = self.EffectList:Find(effectName)
 				if not effectDefinition then
-					return warn(("Attempt to apply invalid effect %q from aura %q"):format(effectName, name))
+					return warn(("[Aurora] Attempt to apply invalid effect %q from aura %q"):format(effectName, name))
 				end
 
 				if effectDefinition.AllowedInstanceTypes then
@@ -282,7 +282,7 @@ function AuraAgent:ReifyEffects()
 
 					if not allowed then
 						return warn(
-							("Attempt to apply effect %q on disallowed instance type %q")
+							("[Aurora] Attempt to apply effect %q on disallowed instance type %q")
 							:format(effectName, self.Instance.ClassName)
 						)
 					end

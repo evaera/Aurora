@@ -9,6 +9,8 @@ local SyncEvent = Resources:GetRemoteEvent(".Aurora")
 local SyncFunction = Resources:GetRemoteFunction(".Aurora")
 local IsServer = RunService:IsServer()
 
+local IsTooLateToRegister = false
+
 -- Library
 
 local Aurora = {
@@ -41,11 +43,22 @@ function Aurora.GetAgent(instance)
 	end
 end
 
+local function warnIfTooLate()
+	if IsTooLateToRegister then
+		warn(
+			"[Aurora] You are registering Auras/Effects too late. Please do not yield between your first require of Aurora"
+			.. "and your register calls."
+			)
+	end
+end
+
 function Aurora.RegisterAurasIn(object)
+	warnIfTooLate()
 	Aurora.Auras:LookIn(object)
 end
 
 function Aurora.RegisterEffectsIn(object)
+	warnIfTooLate()
 	Aurora.Effects:LookIn(object)
 end
 
@@ -91,6 +104,11 @@ function Aurora.Snapshot()
 	return snapshot
 end
 
+-- Register auras
+
+Aurora.RegisterAurasIn(script.BuiltInAuras)
+Aurora.RegisterEffectsIn(script.BuiltInEffects)
+
 -- Event connections
 
 if IsServer then
@@ -107,16 +125,18 @@ if IsServer then
 	game:GetService("Players").PlayerRemoving:Connect(function(player)
 		lastRequest[player] = nil
 	end)
-else
-	require(script.ClientNetwork)(Aurora)
 end
-
-Aurora.RegisterAurasIn(script.BuiltInAuras)
-Aurora.RegisterEffectsIn(script.BuiltInEffects)
 
 -- Update loop
 
 spawn(function()
+	-- We delay setting up network stuff until after a cycle, to let the developer
+	-- register their Auras
+	if not IsServer then
+		require(script.ClientNetwork)(Aurora)
+		IsTooLateToRegister = true
+	end
+
 	while true do
 		local dt = wait(Aurora.TickRate)
 

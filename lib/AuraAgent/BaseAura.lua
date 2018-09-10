@@ -79,26 +79,12 @@ end
 local Aura = {}
 Aura.__index = Aura
 
-function Aura.PruneNonReplicatedSections(props)
-	local pruned = {}
-
-	for key, value in pairs(props) do
-		if REPLICATED_SECTIONS[key] then
-			pruned[key] = value
-		end
-	end
-
-	return pruned
-end
-
 function Aura.new(auraName, auraDefinition, props)
 	assert(t.tuple(t.string, t.table, t.table)(auraName, auraDefinition, props))
 
 	local self = setmetatable({
 		Id = auraName;
-		ReplicatedSections = {
-			Status = true; -- Status is always replicated, because it is always modified
-		};
+		ChangedProperties = {};
 		Props = props;
 	}, Aura)
 
@@ -113,10 +99,16 @@ function Aura.new(auraName, auraDefinition, props)
 	self.Status.Stacks = 1
 	self.Status.TimeLeft = self.Status.Duration
 
-	-- keep track of which sections we need to send in snapshot
-	for key in pairs(props) do
-		if REPLICATED_SECTIONS[key] then
-			self.ReplicatedSections[key] = true
+	-- keep track of which properties we need to send in snapshot
+	for sectionName, section in pairs(props) do
+		if REPLICATED_SECTIONS[sectionName] then
+			if self.ChangedProperties[sectionName] == nil then
+				self.ChangedProperties[sectionName] = {}
+			end
+
+			for key in pairs(section) do
+				self.ChangedProperties[sectionName][key] = true
+			end
 		end
 	end
 
@@ -128,7 +120,7 @@ function Aura.new(auraName, auraDefinition, props)
 		-- This must be done like this because next() won't pick up keys in the hacky way we are doing it
 		for key in pairs(auraDefinition.__keys) do -- __keys comes from the Immutable module
 			if AuraStructure[key] == nil then
-				error(("Unknown key %q in aura %q."):format(key, auraName), 2)
+				error(("[Aurora] Unknown key %q in aura %q."):format(key, auraName), 2)
 			end
 		end
 	end
@@ -148,16 +140,35 @@ function Aura:GetSections()
 end
 
 --- Returns a set of static props that can be used to re-create this aura as
--- it is now. Does not include client-derivable sections.
+-- it is now. Does not include client-derivable properties.
 function Aura:Snapshot()
-	local static = {}
+	local props = {}
 
-	for section in pairs(self.ReplicatedSections) do
-		static[section] = Util.Staticize(self, self[section], self[section].__keys)
+	for section in pairs(REPLICATED_SECTIONS) do
+		if self.ChangedProperties[section] then
+			props[section] = {}
+
+			for key in pairs(self.ChangedProperties[section]) do
+				props[section][key] = self[section][key]
+			end
+		end
+
+		-- Effects are stored directly with no shadwoing, so this will pick up
+		-- Effects from the definition. We need to exclude this.
+		if section ~= "Effects" then
+			for key, value in pairs(self[section]) do
+				if props[section] == nil then
+					props[section] = {}
+				end
+
+				props[section][key] = value
+			end
+		end
 	end
 
-	return static
+	return Util.Staticize(self, props)
 end
+
 
 function Aura:FireHook(hookName, ...)
 	if self.Hooks and self.Hooks[hookName] then

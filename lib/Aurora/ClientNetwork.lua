@@ -37,6 +37,13 @@ return function (Aurora)
 		end
 	end
 
+	--[[
+		Possible bug: Client may receive mirrored updates from before it requests the snapshot.
+		All mirrored changes are played back after the update.
+		May need to add mechanism to add timestamp to snapshot and all mirrors.
+		Discard any mirror data sent before the snapshot timestamp.
+	]]
+
 	function AuroraClientNetwork.SyncEverything()
 		local snapshot = SyncFunction:InvokeServer()
 		assert(NetworkTypes.ISnapshotShallow(snapshot))
@@ -80,6 +87,10 @@ return function (Aurora)
 		print("Playback: ", payload.Instance:GetFullName(), payload.Method, Debug.Inspect(payload.Args))
 	end
 
+	-- Sync everything *BEFORE* connecting event listener, so they can queue.
+
+	AuroraClientNetwork.SyncEverything()
+
 	-- Event connections
 
 	SyncEvent.OnClientEvent:Connect(function(data)
@@ -97,8 +108,4 @@ return function (Aurora)
 		AuroraClientNetwork.ActionBuffer[data.ActionIndex] = data
 		AuroraClientNetwork.CheckBuffer()
 	end)
-
-	-- Sync everything
-
-	spawn(AuroraClientNetwork.SyncEverything)
 end

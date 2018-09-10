@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 local Debug = Resources:LoadLibrary("Debug")
 

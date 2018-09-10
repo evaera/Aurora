@@ -38,9 +38,11 @@ Note that these methods must be called from both your client and server code. Ca
 
 ### Methods
 #### `Aurora.GetAgent(instance: Instance): Agent`
-Returns the Agent for the given instance. Each instance will only ever have one Agent, and this method will keep track of created Agents. 
+Returns the Agent for the given instance. Each instance will only ever have one Agent, and this method will keep track of created Agents.
 
 * If the previous Agent is destroyed, either manually or due to configured settings, then a new one will be created.
+
+If called within the same frame that you first load Aurora, this method will yield for one additional frame (this is to give your code in other scripts time to register your custom Auras).
 
 #### `Aurora.RegisterAurasIn(instance: Instance): void`
 Registers the given instance as a container where ModuleScripts returning Aura definitions are kept. 

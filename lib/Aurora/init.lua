@@ -9,7 +9,7 @@ local SyncEvent = Resources:GetRemoteEvent(".Aurora")
 local SyncFunction = Resources:GetRemoteFunction(".Aurora")
 local IsServer = RunService:IsServer()
 
-local IsTooLateToRegister = false
+local IsReady = false
 
 -- Library
 
@@ -21,6 +21,7 @@ local Aurora = {
 	MaxAgentTimeInactive = math.huge;
 	SyncActionIndex = -1;
 	InitialSyncCompleted = IsServer;
+	YieldUntilReady = true;
 }
 
 local Agents = setmetatable({}, {
@@ -33,6 +34,10 @@ local Agents = setmetatable({}, {
 })
 
 function Aurora.GetAgent(instance)
+	while Aurora.YieldUntilReady and not IsReady do
+		wait() -- should only be 1 frame
+	end
+
 	local agent = Agents[instance]
 
 	if not agent.Destroyed then
@@ -44,10 +49,10 @@ function Aurora.GetAgent(instance)
 end
 
 local function warnIfTooLate()
-	if IsTooLateToRegister then
+	if IsReady then
 		warn(
 			"[Aurora] You are registering Auras/Effects too late. Please do not yield between your first require of Aurora"
-			.. "and your register calls."
+			.. " and your register calls."
 			)
 	end
 end
@@ -134,8 +139,9 @@ spawn(function()
 	-- register their Auras
 	if not IsServer then
 		require(script.ClientNetwork)(Aurora)
-		IsTooLateToRegister = true
 	end
+
+	IsReady = true
 
 	while true do
 		local dt = wait(Aurora.TickRate)

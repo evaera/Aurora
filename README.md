@@ -51,7 +51,7 @@ Registers the given instance as a container where ModuleScripts returning Aura d
 The ModuleScript must have the same name as the Aura. Auras are lazy-loaded: the first time an Aura is applied, it is matched with a recursive `FindFirstChild` call for every registered Aura container until it's found, and then it is cached. Feel free to nest folders organizing your Auras, but be aware that *folder names* must also be unique with all module names. If a non-ModuleScript instance is returned from that root, then it will be discarded and will continue searching in other roots (if there are any).
 
 ##### Server shadowing
-ModuleScripts under the container with an Aura name appended with "Server" (case-sensitive) will also be automatically loaded and its top-level section keys will be applied *on top of* the table members exported by the base Aura ModuleScript. This optional feature is only active on the server; even if a "Server"-appended module is replicated to the client, it will not be loaded.
+ModuleScripts under the container with an Aura name appended with "Server" (case-sensitive) will also be automatically loaded and its sections will entirely replace (not merge with) sections exported by the base Aura ModuleScript. This optional feature is only active on the server; even if a "Server"-appended module is replicated to the client, it will not be loaded.
 
 #### `Aurora.RegisterEffectsIn(instance: Instance): void`
 See *RegisterAurasIn* just above. Everything is exactly the same. Except, of course, that ModuleScripts inside these containers must export Effects, not Auras.

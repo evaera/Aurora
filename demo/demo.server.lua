@@ -33,6 +33,7 @@ end
 
 local wAgent = Aurora.GetAgent(workspace)
 wAgent:Apply("TestAuraStackable", {
+	Name = ":TestAuraStackable";
 	Effects = {};
 	Status = {
 		Duration = math.huge;

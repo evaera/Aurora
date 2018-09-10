@@ -42,7 +42,7 @@ Returns the Agent for the given instance. Each instance will only ever have one 
 
 * If the previous Agent is destroyed, either manually or due to configured settings, then a new one will be created.
 
-If called within the same frame that you first load Aurora, this method will yield for one additional frame (this is to give your code in other scripts time to register your custom Auras).
+Ensure that you have registered your Auras and Effects before this method is called.
 
 #### `Aurora.RegisterAurasIn(instance: Instance): void`
 Registers the given instance as a container where ModuleScripts returning Aura definitions are kept. 
@@ -113,6 +113,15 @@ If an Aura is stackable and isn't at its `MaxStacks` value, then a new stack wil
 If an Aura is not stackable, or if it is already at maximum stacks, it will instead "refresh" the Aura if it is allowed. This means that the old Aura is replaced with the new one, and the "AuraRefreshed" event will be fired instead of "AuraAdded".
 
 If an Aura is not stackable, or if it's already at maximum stacks, and `ShouldAuraRefresh` is false, then nothing will happen, and the method will return `false`. Under all other circumstances, `true` will be returned.
+
+##### Custom Aura Names
+When adding an Aura, you can specify a custom name that will be used for internal tracking. This will let the Aura be nonunique with other Auras of the same type. It won't stack with other Auras of the same type (unless they also have the same custom name). Remember, Effects will still always be unique with other Auras providing the same Effects: If more than one of the same Aura exist with custom names, all of their Effect values will be passed into the single Effect reducer, just as if they were distinct Auras. 
+
+To specify a custom name, pass a property `Name` in as a Prop when applying this Aura. The `Name` property must be a string that begins with a colon (`:`). When calling any other methods (like `Remove`, `Get`, `Consume`, and `Has`), you must now refer to the Aura as the custom name you provided, colon included. You can still access the true type of this Aura with the `Id` property of the Aura.
+
+This feature is useful for when you need to add multiple of the same Aura at the same time but with different Params, so adding a stack or refreshing duration wouldn't be appropriate.
+
+Note: Aurora will throw an error if you attempt to apply two *distinct* Auras with the same custom name at the same time.
 
 #### `Agent:Remove(auraName: string, reason = "REMOVED"): boolean`
 Removes the Aura of the given name from this Agent. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
@@ -239,8 +248,11 @@ The `Status` section may only have specific properties inside, but `Params` and 
 
 Aura properties are all loaded from the Aura definition, overshadowed by any Props specific to this Aura.
 
+#### `Aura.Name: string`
+If this Aura has a custom name, then this is the custom name. Otherwise, it's the same as `Id`.
+
 #### `Aura.Id: string`
-The name of this Aura.
+The name of this Aura from its definition.
 
 #### `Aura.Display: dictionary`
 A dictionary where you could include display-related properties such as:

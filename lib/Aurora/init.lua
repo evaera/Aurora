@@ -21,7 +21,6 @@ local Aurora = {
 	MaxAgentTimeInactive = math.huge;
 	SyncActionIndex = -1;
 	InitialSyncCompleted = IsServer;
-	YieldUntilReady = true;
 }
 
 local Agents = setmetatable({}, {
@@ -34,10 +33,6 @@ local Agents = setmetatable({}, {
 })
 
 function Aurora.GetAgent(instance)
-	while Aurora.YieldUntilReady and not IsReady do
-		wait() -- should only be 1 frame
-	end
-
 	local agent = Agents[instance]
 
 	if not agent.Destroyed then

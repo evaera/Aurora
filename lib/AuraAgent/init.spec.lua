@@ -13,6 +13,8 @@ return function()
 			expect(agent:Has("TestAuraStandard")).to.equal(true)
 			expect(agent:Get("TestAuraStandard")).to.be.a("table")
 			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(10)
+			expect(agent:Get("TestAuraStandard").Id).to.equal("TestAuraStandard")
+			expect(agent:Get("TestAuraStandard").Name).to.equal("TestAuraStandard")
 		end)
 
 		it("Should merge aura info with given props", function()
@@ -109,72 +111,112 @@ return function()
 			expect(callCount).to.equal(2)
 		end)
 
-		it("Should fire the AuraRemoved event and hook", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
-			local hookCalled = false
-			agent:Apply("TestAuraStandard", {
-				Hooks = {
-					AuraRemoved = function()
-						hookCalled = true
-					end
-				}
-			})
-
-			local eventFired = false
-			agent.AuraRemoved:Connect(function(aura)
-				eventFired = true
-				expect(aura.Id).to.equal("TestAuraStandard")
-			end)
-
-			expect(agent:Remove("TestAuraStandard")).to.equal(true)
-			expect(agent:Remove("TestAuraStandard")).to.equal(false)
-
-			wait()
-
-			expect(eventFired).to.equal(true)
-			expect(hookCalled).to.equal(true)
-		end)
-
-		it("Should fire AuraStackRemoved when consumed", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
-			local timesStackRemovedHook = 0
-			local timesRemovedHook = 0
-			agent:Apply("TestAuraStackable")
-			agent:Apply("TestAuraStackable", { Hooks = {
-				AuraStackRemoved = function ()
-					timesStackRemovedHook = timesStackRemovedHook + 1
-				end;
-				AuraRemoved = function ()
-					timesRemovedHook = timesRemovedHook + 1
-				end;
-			}})
-
-			local timesStackRemovedFired = 0
-			local timesRemovedFired = 0
-
-			agent.AuraStackRemoved:Connect(function(aura)
-				timesStackRemovedFired = timesStackRemovedFired + 1
-				expect(aura.Id).to.equal("TestAuraStackable")
-			end)
-
-			agent.AuraRemoved:Connect(function(aura)
-				timesRemovedFired = timesRemovedFired + 1
-				expect(aura.Id).to.equal("TestAuraStackable")
-			end)
-
-			expect(agent:Consume("TestAuraStackable")).to.equal(true)
-			expect(agent:Consume("TestAuraStackable")).to.equal(true)
-			expect(agent:Consume("TestAuraStackable")).to.equal(false)
-
-			wait()
-
-			expect(timesStackRemovedHook).to.equal(2)
-			expect(timesRemovedHook).to.equal(1)
-			expect(timesStackRemovedFired).to.equal(2)
-			expect(timesRemovedFired).to.equal(1)
-		end)
 	end)
 
+	it("Should fire the AuraRemoved event and hook", function()
+		local agent = AuraAgent.new(workspace, Auras, Effects)
+		local hookCalled = false
+		agent:Apply("TestAuraStandard", {
+			Hooks = {
+				AuraRemoved = function()
+					hookCalled = true
+				end
+			}
+		})
+
+		local eventFired = false
+		agent.AuraRemoved:Connect(function(aura)
+			eventFired = true
+			expect(aura.Id).to.equal("TestAuraStandard")
+		end)
+
+		expect(agent:Remove("TestAuraStandard")).to.equal(true)
+		expect(agent:Remove("TestAuraStandard")).to.equal(false)
+
+		wait()
+
+		expect(eventFired).to.equal(true)
+		expect(hookCalled).to.equal(true)
+	end)
+
+	it("Should fire AuraStackRemoved when consumed", function()
+		local agent = AuraAgent.new(workspace, Auras, Effects)
+		local timesStackRemovedHook = 0
+		local timesRemovedHook = 0
+		agent:Apply("TestAuraStackable")
+		agent:Apply("TestAuraStackable", { Hooks = {
+			AuraStackRemoved = function ()
+				timesStackRemovedHook = timesStackRemovedHook + 1
+			end;
+			AuraRemoved = function ()
+				timesRemovedHook = timesRemovedHook + 1
+			end;
+		}})
+
+		local timesStackRemovedFired = 0
+		local timesRemovedFired = 0
+
+		agent.AuraStackRemoved:Connect(function(aura)
+			timesStackRemovedFired = timesStackRemovedFired + 1
+			expect(aura.Id).to.equal("TestAuraStackable")
+		end)
+
+		agent.AuraRemoved:Connect(function(aura)
+			timesRemovedFired = timesRemovedFired + 1
+			expect(aura.Id).to.equal("TestAuraStackable")
+		end)
+
+		expect(agent:Consume("TestAuraStackable")).to.equal(true)
+		expect(agent:Consume("TestAuraStackable")).to.equal(true)
+		expect(agent:Consume("TestAuraStackable")).to.equal(false)
+
+		wait()
+
+		expect(timesStackRemovedHook).to.equal(2)
+		expect(timesRemovedHook).to.equal(1)
+		expect(timesStackRemovedFired).to.equal(2)
+		expect(timesRemovedFired).to.equal(1)
+	end)
+
+	describe("Custom names", function()
+		it("Should work with custom Aura names", function()
+			local agent = AuraAgent.new(workspace, Auras, Effects)
+
+			agent:Apply("TestAuraStandard")
+			agent:Apply("TestAuraStandard", { Name = ":n1" })
+			agent:Apply("TestAuraStandard", { Name = ":n2" })
+
+			expect(agent:Has("TestAuraStandard")).to.equal(true)
+			expect(agent:Has(":n1")).to.equal(true)
+			expect(agent:Has(":n2")).to.equal(true)
+			expect(agent:Get(":n2").Name).to.equal(":n2")
+			expect(agent:Get(":n2").Id).to.equal("TestAuraStandard")
+
+			agent:Remove(":n1")
+
+			expect(agent:Has("TestAuraStandard")).to.equal(true)
+			expect(agent:Has(":n1")).to.equal(false)
+			expect(agent:Has(":n2")).to.equal(true)
+		end)
+
+		it("Should disallow distinct Auras having the same custom name", function()
+			local agent = AuraAgent.new(workspace, Auras, Effects)
+
+			expect(function()
+				agent:Apply("TestAuraStandard", { Name = ":name" })
+				agent:Apply("TestAuraStackable", { Name = ":name" })
+			end).to.throw()
+
+			local agent2 = AuraAgent.new(workspace, Auras, Effects)
+
+			expect(function()
+				agent2:Apply("TestAuraStackable", { Name = ":name" })
+				agent2:Apply("TestAuraStackable", { Name = ":name" })
+
+				expect(agent2:Get(":name").Status.Stacks).to.equal(2)
+			end).never.to.throw()
+		end)
+	end)
 
 	describe("AuraAgent:Update", function()
 		local testObject = Instance.new("BoolValue", game.TestService)

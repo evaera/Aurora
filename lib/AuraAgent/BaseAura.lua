@@ -84,6 +84,7 @@ function Aura.new(auraName, auraDefinition, props)
 
 	local self = setmetatable({
 		Id = auraName;
+		Name = props.Name or auraName;
 		ChangedProperties = {};
 		Props = props;
 	}, Aura)
@@ -116,6 +117,10 @@ function Aura.new(auraName, auraDefinition, props)
 	if IsStudio then -- Only run in Studio because this a pretty expensive type check
 		assert(IAuraDefinition(self:GetSections()))
 
+		if self.Id:sub(1, 1) == ":" then
+			error("[Aurora] Aura names cannot begin with a colon (:)")
+		end
+
 		-- Manually check that there are no weird keys in the aura info.
 		-- This must be done like this because next() won't pick up keys in the hacky way we are doing it
 		for key in pairs(auraDefinition.__keys) do -- __keys comes from the Immutable module
@@ -142,7 +147,10 @@ end
 --- Returns a set of static props that can be used to re-create this aura as
 -- it is now. Does not include client-derivable properties.
 function Aura:Snapshot()
-	local props = {}
+	local props = {
+		-- Forward custom name if it doesn't match
+		Name = self.Id ~= self.Name and self.Name or nil;
+	}
 
 	for section in pairs(REPLICATED_SECTIONS) do
 		if self.ChangedProperties[section] then

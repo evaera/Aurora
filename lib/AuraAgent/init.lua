@@ -87,6 +87,17 @@ function AuraAgent:Apply(auraName, props)
 		self:Sync("Apply", auraName, aura:Snapshot())
 	end
 
+	if props.Name and props.Name:sub(1, 1) ~= ":" then
+		error("[Aurora] Custom Aura names must begin with a colon (:)", 2)
+	end
+
+	if props.Name and self.ActiveAuras[props.Name] and self.ActiveAuras[props.Name].Id ~= auraName then
+		print(self.ActiveAuras[props.Name].Id, auraName)
+		error("[Aurora] Can't apply two distinct Auras with the same custom name at the same time.", 2)
+	end
+
+	auraName = props.Name or auraName
+
 	if self.ActiveAuras[auraName] then
 		local oldAura = self.ActiveAuras[auraName]
 
@@ -226,9 +237,9 @@ function AuraAgent:Snapshot()
 
 	local snapshot = {}
 
-	for name, aura in pairs(self.ActiveAuras) do
+	for _, aura in pairs(self.ActiveAuras) do
 		if Default(aura.Status.Replicated, true) then
-			snapshot[name] = aura:Snapshot()
+			snapshot[aura.Id] = aura:Snapshot()
 		end
 	end
 

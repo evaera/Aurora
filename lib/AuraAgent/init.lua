@@ -198,15 +198,22 @@ end
 
 function AuraAgent:Has(auraName)
 	CheckDestroy(self)
-
 	assert(t.string(auraName))
+
 	return self.ActiveAuras[auraName] ~= nil
+end
+
+function AuraAgent:HasEffect(effectName)
+	CheckDestroy(self)
+	assert(t.string(effectName))
+
+	return self.ActiveEffects[effectName] ~= nil
 end
 
 function AuraAgent:Get(auraName)
 	CheckDestroy(self)
-
 	assert(t.string(auraName))
+
 	return self.ActiveAuras[auraName]
 end
 

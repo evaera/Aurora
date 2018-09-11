@@ -144,6 +144,9 @@ Returns `true` if an Aura was actually consumed, `false` if nothing happened bec
 #### `Agent:Has(auraName: string): boolean`
 Returns `true` if an Aura of the given name is currently applied to this Agent, `false` otherwise.
 
+#### `Agent:HasEffect(effectName: string): boolean`
+Returns `true` if an Effect of the given name is currently active on this Agent, `false` otherwise.
+
 #### `Agent:Get(auraName: string): Aura?`
 Returns the Aura of the given name if it's currently applied to this Agent, `nil` otherwise.
 

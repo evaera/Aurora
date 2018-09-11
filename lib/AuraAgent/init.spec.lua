@@ -232,6 +232,8 @@ return function()
 
 			expect(success).to.equal(true)
 			expect(agent:Has("TestAuraStandard")).to.equal(true)
+			expect(agent:HasEffect("TestEffect")).to.equal(true) -- Test HasEffect
+			expect(agent:HasEffect("TestEffectPrintReduce")).to.equal(false)
 			expect(agent:Get("TestAuraStandard")).to.be.a("table")
 			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(9.8)
 			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(10)

@@ -3,7 +3,7 @@
 </div>
 
 
-Current status: Functional and ready for real world tests. You may encounter bugs. GitHub issues for bugs are appreciated.
+Current status: Functional and ready for real world application.
 
 # Aurora
 
@@ -13,13 +13,15 @@ Using Aurora can help you stay sane while managing complex game state when multi
 
 Aurora is made for and requires [RoStrap](https://rostrap.github.io/), a light weight module management system.
 
-## Example use case
+## How it works
 
 A classic example of the problem that Aurora aims to solve is changing the player's walk speed. Let's say you have a heavy weapon that you want to have slow down the player when he equips it. That's easy enough, you just set the walk speed when the weapon is equipped, and set it back to default when the weapon is unequipped.
 
 But what if you want something else to change the player's walk speed as well, potentially at the same time? For example, in addition to the heavy weapon, say the player could equip a shield which also slows them down a bit. If we follow the same flow as when we implemented the logic for the heavy weapon above, we now have a problem: The player can equip both the heavy weapon and the shield, and then unequip the heavy weapon. Now, the player can walk around at full speed with a shield up when they should still be slowed!
 
 Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide the movement speed altering *Effect*, each of which can have different intensities. Then, every update cycle, Aurora will group all similar *Effects* and feed all of their values into a reducer function. In this case, the function will find the lowest value from all of the Effects, and then set the player's WalkSpeed to that number.
+
+<img src="assets/Diagram.png" alt="Aurora" height="766.16" />
 
 Now, there is only one source of truth for the player's WalkSpeed, which solves all of our problems. When there are no longer any Auras that provide the walk speed Effect, Aurora will clean up by setting the player's walk speed back to default.
 

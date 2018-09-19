@@ -21,7 +21,7 @@ But what if you want something else to change the player's walk speed as well, p
 
 Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide the movement speed altering *Effect*, each of which can have different intensities. Then, every update cycle, Aurora will group all similar *Effects* and feed all of their values into a reducer function. In this case, the function will find the lowest value from all of the Effects, and then set the player's WalkSpeed to that number.
 
-<img src="assets/Diagram.png" alt="Aurora" height="766.16" />
+<img src="assets/Diagram.svg" alt="Aurora" />
 
 Now, there is only one source of truth for the player's WalkSpeed, which solves all of our problems. When there are no longer any Auras that provide the walk speed Effect, Aurora will clean up by setting the player's walk speed back to default.
 

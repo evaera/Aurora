@@ -227,12 +227,14 @@ return function()
 			local success = agent:Apply("TestAuraStandard")
 
 			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(10)
+			expect(agent:GetLastReducedValue("TestEffect")).to.equal(nil)
 
 			agent:Update(0.2)
 
 			expect(success).to.equal(true)
 			expect(agent:Has("TestAuraStandard")).to.equal(true)
 			expect(agent:HasEffect("TestEffect")).to.equal(true) -- Test HasEffect
+			expect(agent:GetLastReducedValue("TestEffect")).to.equal(1)
 			expect(agent:HasEffect("TestEffectPrintReduce")).to.equal(false)
 			expect(agent:Get("TestAuraStandard")).to.be.a("table")
 			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(9.8)

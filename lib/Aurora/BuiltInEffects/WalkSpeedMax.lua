@@ -10,7 +10,11 @@ return {
 			end
 		end
 
-		self.Instance.WalkSpeed = walkSpeed
+		return walkSpeed
+	end;
+
+	Apply = function (self, value)
+		self.Instance.WalkSpeed = value
 	end;
 
 	Destructor = function (self)

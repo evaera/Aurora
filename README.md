@@ -9,7 +9,7 @@ Current status: Functional and ready for real world application.
 
 **Aurora** is a library that can manage status effects (known as "Auras") in your Roblox game. These Auras are much akin to "buffs" and "debuffs" as seen in many games.
 
-Using Aurora can help you stay sane while managing complex game state when multiple parts of your game need to keep track of or change the same resource.
+Using Aurora can help you stay sane while managing complex game state when multiple parts of your game need to keep track of or change the same resource. *It's like Redux, but for games!*
 
 Aurora is made for and requires [RoStrap](https://rostrap.github.io/), a light weight module management system.
 
@@ -19,7 +19,7 @@ A classic example of the problem that Aurora aims to solve is changing the playe
 
 But what if you want something else to change the player's walk speed as well, potentially at the same time? For example, in addition to the heavy weapon, say the player could equip a shield which also slows them down a bit. If we follow the same flow as when we implemented the logic for the heavy weapon above, we now have a problem: The player can equip both the heavy weapon and the shield, and then unequip the heavy weapon. Now, the player can walk around at full speed with a shield up when they should still be slowed!
 
-Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide the movement speed altering *Effect*, each of which can have different intensities. Then, every update cycle, Aurora will group all similar *Effects* and feed all of their values into a reducer function. In this case, the function will find the lowest value from all of the Effects, and then set the player's WalkSpeed to that number.
+Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide the movement speed altering *Effect*, each of which can have different intensities. Then, every update cycle, Aurora will group all similar *Effects* and feed all of their values into a single reducer function. In this case, the function will find the lowest value from all of the Auras, and then the player's WalkSpeed will be set to that number.
 
 <img src="assets/Diagram.svg" alt="Aurora" />
 
@@ -59,7 +59,7 @@ ModuleScripts under the container with an Aura name appended with "Server" (case
 See *RegisterAurasIn* just above. Everything is exactly the same. Except, of course, that ModuleScripts inside these containers must export Effects, not Auras.
 
 #### `Aurora.SetTickRate(seconds: number): void`
-Sets how often, in seconds, that all Auras and Effects will be updated. "Updating" in this context refers to lowering remaining duration on Auras, removing expired Auras, and most importantly calling the "Reducer" method on Effects.
+Sets how often, in seconds, that all Auras and Effects will be updated. "Updating" in this context refers to lowering remaining duration on Auras, removing expired Auras, and most importantly calling the "Reducer" and "Apply" methods on Effects.
 
 The default value is `0.5` seconds.
 
@@ -146,9 +146,6 @@ Returns `true` if an Aura was actually consumed, `false` if nothing happened bec
 #### `Agent:Has(auraName: string): boolean`
 Returns `true` if an Aura of the given name is currently applied to this Agent, `false` otherwise.
 
-#### `Agent:HasEffect(effectName: string): boolean`
-Returns `true` if an Effect of the given name is currently active on this Agent, `false` otherwise.
-
 #### `Agent:Get(auraName: string): Aura?`
 Returns the Aura of the given name if it's currently applied to this Agent, `nil` otherwise.
 
@@ -158,6 +155,12 @@ Do not store the return value from this method for long, because Auras can be cr
 Returns an array of all Auras currently applied to this Agent.
 
 Do not store the return values from this method for long, because Auras can be created and destroyed quickly. Storing these values or trapping them in a closure will cause memory leaks.
+
+#### `Agent:HasEffect(effectName: string): boolean`
+Returns `true` if an Effect of the given name is currently active on this Agent, `false` otherwise.
+
+#### `Agent:GetLastReducedValue(effectName: string): any`
+Returns the last value that was returned by the given Effect's Reducer function, or `nil` if the Effect doesn't exist on this Agent. This method is most useful for when it's more appropriate for your code to "reach in" to Aurora and pull out the value from an Effect, rather than "reaching out" from Aurora and making a change in the world with the Apply function.
 
 #### `Agent:Destroy(): void`
 Destroys this Agent, rendering it unusable. All events will be disconnected, Effects will be deconstructed, Auras will be removed, it will no longer be updated or kept in memory internally, and calling any further methods on this Agent will raise an error.
@@ -312,11 +315,12 @@ Note: Hooks do not fire during the initial world snapshot playback when a player
 
 Auras can provide Effects (with various parameters), which are used to actually make changes to the world. Effects are explicitly defined by the developer just like Auras. Unlike Auras, however, an Effect can only exist once per Agent, and they are automatically created and destroyed based on what Effects are provided by the current set of Auras.
 
-Effects are made up of three functions: a `Constructor`, a `Destructor`, and a `Reducer`.
+Effects are made up of four functions, which are all optional: `Constructor`, `Reducer`, `Apply`, and `Destructor`.
 
 - The `Constructor` is called whenever one of the Auras starts providing this Effect. It can be used to create any necessary objects needed to enact or display this Effect.
   - For example, if you want to display a "dizzy" indicator above a player when they are stunned, this function could create that and put it inside the character.
-- The `Reducer` is called every update cycle, and takes in any parameters given by Auras which are providing this Effect. It is then the Reducer's job to determine what changes to make to the world state.
+- The `Reducer` is called every update cycle, and takes in any parameters given by Auras which are providing this Effect as an array. It is then this function's job to *reduce* these values into one value and then return it.
+- The `Apply` function is called immediately after the Reducer, and it is given whatever `Apply` returned as arguments. This function should actually make a change in the world based on the reduced value it is given. This separation is enforced so that the reduced value can be captured for `Agent:GetLastReducedValue` to work as expected.
 - The `Destructor` is called when there are no longer any Auras providing this Effect. It can be used to clean up any objects that were created in the Constructor.
 
 ### Definition
@@ -343,7 +347,7 @@ return {
   Reducer = function (self, values)
     -- `values` is an array containing the resolved value from every Aura that
     -- is providing this Effect. Here, we need to take all of these values and
-    -- then *reduce* them down into a change we make into the world.
+    -- then *reduce* them down into a single value.
 
     local walkSpeed = math.huge
 
@@ -353,6 +357,13 @@ return {
       end
     end
 
+    return walkSpeed
+  end;
+
+  -- The Apply function is called immediately after the Reducer returns.
+  -- It is given any values that the Reducer function returns.
+  -- We then take the reduced value and *apply* a change in the world.
+  Apply = function (self, walkSpeed)
     self.Instance.WalkSpeed = walkSpeed
   end;
 

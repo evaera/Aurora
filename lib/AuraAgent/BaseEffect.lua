@@ -12,6 +12,7 @@ local IsStudio = RunService:IsStudio()
 local EffectStructure = {
 	AllowedInstanceTypes = t.optional(t.array(t.string));
 	Reducer = t.optional(t.callback);
+	Apply = t.optional(t.callback);
 	Constructor = t.optional(t.callback);
 	Destructor = t.optional(t.callback);
 }
@@ -37,6 +38,7 @@ function Effect.new(effectName, effectDefinition, agent)
 		Definition = effectDefinition;
 		Agent = agent;
 		Instance = agent.Instance;
+		LastReducedValue = nil;
 	}
 	setmetatable(self, Effect)
 
@@ -48,20 +50,28 @@ end
 
 function Effect:Construct()
 	if self.Definition.Constructor then
-		self.Definition.Constructor(self) -- TODO: xpcall
+		self.Definition.Constructor(self) -- TODO: prevent yield
 	end
 end
 
-function Effect:Reduce(values)
+function Effect:ReduceAndApply(values)
 	if self.Definition.Reducer then
-		self.Definition.Reducer(self, values) -- TODO: xpcall
+		self.LastReducedValue = {self.Definition.Reducer(self, values)} -- TODO: prevent yield
+	end
+
+	if self.Definition.Apply then
+		self.Definition.Apply(self, unpack(self.LastReducedValue))
 	end
 end
 
 function Effect:Destruct()
 	if self.Definition.Destructor then
-		self.Definition.Destructor(self) -- TODO: xpcall
+		self.Definition.Destructor(self) -- TODO: prevent yield
 	end
+end
+
+function Effect:GetLastReducedValue()
+	return unpack(self.LastReducedValue)
 end
 
 return Effect

@@ -210,6 +210,13 @@ function AuraAgent:HasEffect(effectName)
 	return self.ActiveEffects[effectName] ~= nil
 end
 
+function AuraAgent:GetLastReducedValue(effectName)
+	CheckDestroy(self)
+	assert(t.string(effectName))
+
+	return self.ActiveEffects[effectName] ~= nil and self.ActiveEffects[effectName]:GetLastReducedValue() or nil
+end
+
 function AuraAgent:Get(auraName)
 	CheckDestroy(self)
 	assert(t.string(auraName))
@@ -314,7 +321,7 @@ function AuraAgent:ReifyEffects()
 	-- Reduce active effects and remove effects that are no longer in use
 	for name, effect in pairs(self.ActiveEffects) do
 		if activeEffects[name] then
-			effect:Reduce(activeEffects[name])
+			effect:ReduceAndApply(activeEffects[name])
 		else
 			effect:Destruct()
 			self.ActiveEffects[name] = nil

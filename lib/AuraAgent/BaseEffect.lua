@@ -38,7 +38,7 @@ function Effect.new(effectName, effectDefinition, agent)
 		Definition = effectDefinition;
 		Agent = agent;
 		Instance = agent.Instance;
-		LastReducedValue = nil;
+		LastReducedValue = {};
 	}
 	setmetatable(self, Effect)
 

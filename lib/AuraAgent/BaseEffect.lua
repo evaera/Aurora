@@ -82,7 +82,7 @@ function Effect:ReduceAndApply(values)
 	end
 
 	if self.Definition.Apply then
-		self.Definition.Apply(self, unpack(self.LastReducedValue))
+		self.Definition.Apply(self, self.Definition.Reducer and unpack(self.LastReducedValue))
 	end
 end
 

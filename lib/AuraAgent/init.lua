@@ -92,7 +92,6 @@ function AuraAgent:Apply(auraName, props)
 	end
 
 	if props.Name and self.ActiveAuras[props.Name] and self.ActiveAuras[props.Name].Id ~= auraName then
-		print(self.ActiveAuras[props.Name].Id, auraName)
 		error("[Aurora] Can't apply two distinct Auras with the same custom name at the same time.", 2)
 	end
 

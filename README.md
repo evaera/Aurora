@@ -323,6 +323,10 @@ Effects are made up of four functions, which are all optional: `Constructor`, `R
 - The `Apply` function is called immediately after the Reducer, and it is given whatever `Apply` returned as arguments. This function should actually make a change in the world based on the reduced value it is given. This separation is enforced so that the reduced value can be captured for `Agent:GetLastReducedValue` to work as expected.
 - The `Destructor` is called when there are no longer any Auras providing this Effect. It can be used to clean up any objects that were created in the Constructor.
 
+Effects may also have these optional properties:
+- `AllowedInstanceTypes` - Table of strings that limits the types of instances that this Effect can be applied to. Aurora will produce a warning if an Effect is applied to an improper instance type, and the Effect wil be discarded. Uses :IsA comparison.
+- `Lazy` - A boolean value that, if true, will only run the `Apply` function if the reduced value changes from its last value.
+
 ### Definition
 
 ```lua

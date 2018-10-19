@@ -219,7 +219,7 @@ return function()
 	end)
 
 	describe("AuraAgent:Update", function()
-		local testObject = Instance.new("BoolValue", game.TestService)
+		local testObject = Instance.new("NumberValue", game.TestService)
 
 		it("Should update auras when Update is called", function()
 			local agent = AuraAgent.new(testObject, Auras, Effects)
@@ -240,6 +240,22 @@ return function()
 			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(9.8)
 			expect(agent:Get("TestAuraStandard").Status.Duration).to.equal(10)
 			expect(testObject.Name).to.equal("1")
+		end)
+
+		it("Should skip lazy effects when there's no change", function()
+			local agent = AuraAgent.new(testObject, Auras, Effects)
+
+			agent:Apply("TestAuraStandard")
+
+			agent:Update(0.2)
+
+			local value = testObject.Value
+
+			agent:Update(0.2)
+			agent:Update(0.2)
+			agent:Update(0.2)
+
+			expect(value).to.equal(testObject.Value)
 		end)
 	end)
 end

@@ -1,5 +1,6 @@
 return {
-	AllowedInstanceTypes = {"BoolValue"};
+	AllowedInstanceTypes = {"NumberValue"};
+	Lazy = true;
 
 	Reducer = function (self, values)
 		return #values
@@ -7,6 +8,7 @@ return {
 
 	Apply = function (self, name)
 		self.Instance.Name = name
+		self.Instance.Value = tick()
 	end;
 
 	Destructor = function (self)

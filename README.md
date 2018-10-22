@@ -172,7 +172,7 @@ The instance that this Agent is attached to.
 ### Events
 
 #### `AuraAdded (aura: Aura)`
-#### `AuraRemoved (auraName: string)`
+#### `AuraRemoved (aura: Aura, reason: string)`
 #### `AuraRefreshed (newAura: Aura, oldAura: Aura)`
 #### `AuraStackAdded (aura: Aura)`
 #### `AuraStackRemoved (aura: Aura)`

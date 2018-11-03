@@ -7,6 +7,14 @@ local NetworkTypes = require(script.Parent.NetworkTypes)
 local SyncEvent = Resources:GetRemoteEvent(".Aurora")
 local SyncFunction = Resources:GetRemoteFunction(".Aurora")
 
+local DEBUG = false
+
+local function dprint(...)
+	if DEBUG then
+		print(...)
+	end
+end
+
 return function (Aurora)
 	-- AuroraClientNetwork
 	local AuroraClientNetwork = {
@@ -47,7 +55,7 @@ return function (Aurora)
 		local snapshot = SyncFunction:InvokeServer()
 		assert(NetworkTypes.ISnapshotShallow(snapshot))
 
-		print("Snapshot:", Debug.Inspect(snapshot))
+		dprint("Snapshot:", Debug.Inspect(snapshot))
 
 		for _, agentPayload in pairs(snapshot) do
 			local ok, warning = NetworkTypes.ISnapshotPayload(agentPayload)
@@ -83,7 +91,7 @@ return function (Aurora)
 		agent[payload.Method](agent, unpack(payload.Args))
 		agent.IncomingReplication = false
 
-		print("Playback: ", payload.Instance:GetFullName(), payload.Method, Debug.Inspect(payload.Args))
+		dprint("Playback: ", payload.Instance:GetFullName(), payload.Method, Debug.Inspect(payload.Args))
 	end
 
 	-- Sync everything *BEFORE* connecting event listener, so they can queue.

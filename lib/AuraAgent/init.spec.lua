@@ -3,9 +3,11 @@ return function()
 	local Effects = require(script.Parent.Parent.Aurora).Effects
 	local AuraAgent = require(script.Parent)
 
+	local testValue = Instance.new("NumberValue", workspace)
+
 	describe("AuraAgent:Apply", function()
 		it("Should apply auras", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 
 			local success = agent:Apply("TestAuraStandard")
 
@@ -18,7 +20,7 @@ return function()
 		end)
 
 		it("Should merge aura info with given props", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 
 			agent:Apply("TestAuraStandard", {
 				Display = {
@@ -47,7 +49,7 @@ return function()
 		end)
 
 		it("Should fire the AuraAdded event and hook", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 
 			local hookCalled = false
 			spawn(function()
@@ -73,7 +75,7 @@ return function()
 		end)
 
 		it("Should refresh duration if re-applied", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 			agent:Apply("TestAuraStandard")
 			local aura1 = agent:Get("TestAuraStandard")
 			agent:Apply("TestAuraStandard")
@@ -84,7 +86,7 @@ return function()
 		end)
 
 		it("Should stack stackable auras", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 			agent:Apply("TestAuraStackable")
 			agent:Apply("TestAuraStackable")
 			agent:Apply("TestAuraStackable")
@@ -94,7 +96,7 @@ return function()
 		end)
 
 		it("Should fire the AuraStackAdded event", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 
 			local callCount = 0
 			agent.AuraStackAdded:Connect(function(aura)
@@ -114,7 +116,7 @@ return function()
 	end)
 
 	it("Should fire the AuraRemoved event and hook", function()
-		local agent = AuraAgent.new(workspace, Auras, Effects)
+		local agent = AuraAgent.new(testValue, Auras, Effects)
 		local hookCalled = false
 		agent:Apply("TestAuraStandard", {
 			Hooks = {
@@ -140,7 +142,7 @@ return function()
 	end)
 
 	it("Should fire AuraStackRemoved when consumed", function()
-		local agent = AuraAgent.new(workspace, Auras, Effects)
+		local agent = AuraAgent.new(testValue, Auras, Effects)
 		local timesStackRemovedHook = 0
 		local timesRemovedHook = 0
 		agent:Apply("TestAuraStackable")
@@ -180,7 +182,7 @@ return function()
 
 	describe("Custom names", function()
 		it("Should work with custom Aura names", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 
 			agent:Apply("TestAuraStandard")
 			agent:Apply("TestAuraStandard", { Name = ":n1" })
@@ -200,14 +202,14 @@ return function()
 		end)
 
 		it("Should disallow distinct Auras having the same custom name", function()
-			local agent = AuraAgent.new(workspace, Auras, Effects)
+			local agent = AuraAgent.new(testValue, Auras, Effects)
 
 			expect(function()
 				agent:Apply("TestAuraStandard", { Name = ":name" })
 				agent:Apply("TestAuraStackable", { Name = ":name" })
 			end).to.throw()
 
-			local agent2 = AuraAgent.new(workspace, Auras, Effects)
+			local agent2 = AuraAgent.new(testValue, Auras, Effects)
 
 			expect(function()
 				agent2:Apply("TestAuraStackable", { Name = ":name" })
@@ -227,7 +229,7 @@ return function()
 			local success = agent:Apply("TestAuraStandard")
 
 			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(10)
-			expect(agent:GetLastReducedValue("TestEffect")).to.equal(nil)
+			expect(agent:GetLastReducedValue("TestEffect")).to.equal(1)
 
 			agent:Update(0.2)
 

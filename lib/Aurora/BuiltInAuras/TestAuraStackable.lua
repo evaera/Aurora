@@ -3,7 +3,7 @@ return {
 		Title = function() return tick() end;
 		Description = function(self)
 			return ("Reduces movement speed by %d%% for %d seconds.")
-			:format(math.floor(self.Effects.WalkSpeedMax(self) / 16 * 100), self.Duration)
+			:format(math.floor(self.Effects.TestEffectWalkSpeedMax(self) / 16 * 100), self.Duration)
 		end;
 	};
 
@@ -20,7 +20,7 @@ return {
 	};
 
 	Effects = {
-		WalkSpeedMax = function(self)
+		TestEffectWalkSpeedMax = function(self)
 			return self.Params.Speed or 10
 		end
 	}

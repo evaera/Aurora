@@ -272,6 +272,8 @@ function AuraAgent:CullAuras(dt)
 	for name, aura in pairs(self.ActiveAuras) do
 		aura.Status.TimeLeft = math.max(aura.Status.TimeLeft - dt, 0)
 
+		-- TODO: Track where auras come from, and allow removal of client-applied auras.
+		-- Potentailly Status.Origination = Remote | Local
 		if IsServer and aura.Status.TimeLeft <= 0 then
 			self:Remove(name, "EXPIRED")
 		end

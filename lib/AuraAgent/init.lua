@@ -47,6 +47,7 @@ function AuraAgent.new(instance, auras, effects, syncCallback)
 		SyncCallback = syncCallback;
 		IncomingReplication = false;
 		DisableHooks = false;
+		Updating = false;
 	}
 	setmetatable(self, AuraAgent)
 
@@ -134,7 +135,10 @@ function AuraAgent:Apply(auraName, props)
 	end
 
 	self.ActiveAuras[auraName] = aura
-	self:ReifyEffects()
+
+	if not self.Updating then
+		self:ReifyEffects()
+	end
 
 	return true
 end
@@ -182,7 +186,11 @@ function AuraAgent:Remove(auraName, cause)
 		self:FireHook(aura, "AuraRemoved", cause)
 		self.AuraRemoved:Fire(self.ActiveAuras[auraName], cause)
 		self.ActiveAuras[auraName] = nil
-		self:ReifyEffects()
+
+		if not self.Updating then
+			self:ReifyEffects()
+		end
+
 		return true
 	end
 
@@ -331,9 +339,12 @@ end
 function AuraAgent:Update(dt)
 	CheckDestroy(self)
 
-	self:CullAuras(dt)
+	self.Updating = true
 
+	self:CullAuras(dt)
 	self:ReifyEffects()
+
+	self.Updating = false
 
 	if next(self.ActiveAuras) == nil then
 		self.TimeInactive = self.TimeInactive + dt

@@ -100,7 +100,7 @@ Agents also handle updating the state of each Aura attached to it, which happens
 
 ### Methods
 #### `Agent:Apply(auraName: string, props?: dictionary): boolean`
-Creates a new Aura of the given name under this Agent. Because Auras are lazy-loaded, this method call will be the first time your Aura definition is validated. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
+Creates a new Aura of the given name under this Agent. Because Auras are lazy-loaded, this method call will be the first time your Aura definition is validated. If the given Aura is defined as being replicated, then this method will also mirror over to all clients. Effects are immediately reified as soon as Apply is called.
 
 ##### Props
 `props` is an optional table dictionary, in which you can override properties from the Aura definition. *Props* must always contain at least one sub-dictionary, because Aura definitions are split into several section dictionaries, as can be seen under *Auras* below. Only the section properties you list here explicitly will be overridden; section properties you omit from Props will still fall back to the section properties from the definition.
@@ -126,7 +126,7 @@ This feature is useful for when you need to add multiple of the same Aura at the
 Note: Aurora will throw an error if you attempt to apply two *distinct* Auras with the same custom name at the same time.
 
 #### `Agent:Remove(auraName: string, reason = "REMOVED"): boolean`
-Removes the Aura of the given name from this Agent. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
+Removes the Aura of the given name from this Agent. If the given Aura is defined as being replicated, then this method will also mirror over to all clients. Effects are immediately reified after Remove is called.
 
 Fires the `AuraRemoved` event and hook.
 
@@ -135,7 +135,7 @@ Fires the `AuraRemoved` event and hook.
 Returns `true` if an Aura was actually removed, `false` if nothing happened because the Aura didn't exist on this Agent.
 
 #### `Agent:Consume(auraName: string, reason = "CONSUMED"): boolean`
-Consumes a stack from the Aura of the given name. If the given Aura is defined as being replicated, then this method will also mirror over to all clients.
+Consumes a stack from the Aura of the given name. If the given Aura is defined as being replicated, then this method will also mirror over to all clients. Effects are immediately reified after Consume is called.
 
 Fires the `AuraStackRemoved` event and hook. If the Aura only has one stack, the `AuraRemoved` event and hook will *also* be fired.
 

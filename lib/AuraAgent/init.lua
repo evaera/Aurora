@@ -24,6 +24,7 @@ local function CheckDestroy(agent)
 	end
 end
 
+-- TODO: Potentially introduce "client-only" flag to Auras and check with this
 local function CheckClient(agent)
 	if IsClient and not agent.IncomingReplication then
 		error("[Aurora] Cannot modify auras from the client", 3)
@@ -71,7 +72,6 @@ end
 
 function AuraAgent:Apply(auraName, props)
 	CheckDestroy(self)
-	CheckClient(self)
 	assert(t.tuple(t.string, t.optional(t.table))(auraName, props))
 
 	props = props or {} -- todo type check props
@@ -134,13 +134,13 @@ function AuraAgent:Apply(auraName, props)
 	end
 
 	self.ActiveAuras[auraName] = aura
+	self:ReifyEffects()
 
 	return true
 end
 
 function AuraAgent:Consume(auraName, cause)
 	CheckDestroy(self)
-	CheckClient(self)
 	assert(t.tuple(t.string, t.optional(t.string))(auraName, cause))
 
 	cause = cause or "CONSUMED"
@@ -168,7 +168,6 @@ end
 
 function AuraAgent:Remove(auraName, cause)
 	CheckDestroy(self)
-	CheckClient(self)
 	assert(t.tuple(t.string, t.optional(t.string))(auraName, cause))
 
 	cause = cause or "REMOVED"
@@ -183,6 +182,7 @@ function AuraAgent:Remove(auraName, cause)
 		self:FireHook(aura, "AuraRemoved", cause)
 		self.AuraRemoved:Fire(self.ActiveAuras[auraName], cause)
 		self.ActiveAuras[auraName] = nil
+		self:ReifyEffects()
 		return true
 	end
 
@@ -244,7 +244,7 @@ end
 function AuraAgent:Snapshot()
 	CheckDestroy(self)
 
-	if self.TimeInactive > 0 then
+	if self.TimeInactive > 0 or #self.ActiveAuras == 0 then
 		return nil -- return nil when there's nothing to snapshot
 	end
 

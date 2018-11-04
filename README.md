@@ -252,6 +252,8 @@ After the Aura definition is loaded (and merged together, if on the server), it'
 
 The `Status` section may only have specific properties inside, but `Params` and `Display` are free for the developer to customize. Properties in `Effects` must correspond to names of Effects that you have registered with `RegisterEffectsIn`.
 
+All sections in an Aura definition are optional.
+
 ### Properties
 
 Aura properties are all loaded from the Aura definition, overshadowed by any Props specific to this Aura.
@@ -265,24 +267,24 @@ If this Aura has a custom name, then this is the custom name. Otherwise, it's th
 #### `Aura.Remote: boolean`
 On the client, this property is `true` if this Aura originated from the server. On the server, it is always `false`.
 
-#### `Aura.Display?: dictionary`
+#### `Aura.Display: dictionary`
 An dictionary where you could include display-related properties such as:
 
 - Title
 - Description
 - Icon
 
-#### `Aura.Params?: dictionary`
+#### `Aura.Params: dictionary`
 A dictionary where you should include any parameters for Effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
 
-#### `Aura.Effects?: dictionary`
+#### `Aura.Effects: dictionary`
 A dictionary containing the Effect values/functions for this Aura.
 
 #### `Aura.Status: dictionary`
 A dictionary containing the state used by Aurora internally (which can also be referenced by your own code)
 
 #### `Aura.Status.Duration: number`
-The original duration of this Aura in seconds.
+The original duration of this Aura in seconds. If unspecified in the definition, defaults to `math.huge`.
 
 #### `Aura.Status.TimeLeft: number`
 The number of seconds remaining on this Aura.

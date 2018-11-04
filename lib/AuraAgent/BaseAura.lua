@@ -8,13 +8,13 @@ local IsStudio = RunService:IsStudio()
 
 local AuraStructure = {
 	Display = t.optional(t.keys(t.string));
-	Status = t.interface({
-		Duration = t.number;
+	Status = t.optional(t.interface({
+		Duration = t.optional(t.number);
 		Visible = t.optional(t.boolean);
 		Replicated = t.optional(t.boolean);
 		MaxStacks = t.optional(t.number);
 		ShouldAuraRefresh = t.optional(t.boolean);
-	});
+	}));
 	Params = t.optional(t.keys(t.string));
 	Effects = t.optional(t.keys(t.string));
 	Hooks = t.optional(t.interface({
@@ -99,7 +99,7 @@ function Aura.new(auraName, auraDefinition, props)
 
 	-- Default values
 	self.Status.Stacks = 1
-	self.Status.TimeLeft = self.Status.Duration
+	self.Status.TimeLeft = self.Status.Duration or math.huge
 
 	-- keep track of which properties we need to send in snapshot
 	for sectionName, section in pairs(props) do

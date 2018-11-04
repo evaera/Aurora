@@ -9,7 +9,6 @@ local Effect = require(script.BaseEffect)
 local Util = require(script.Util)
 
 local Default = Util.Default
-local IsServer = RunService:IsServer()
 local IsClient = RunService:IsServer() == false -- allow to run in old play solo
 
 local AuraAgent = {
@@ -83,6 +82,9 @@ function AuraAgent:Apply(auraName, props)
 	end
 
 	local aura = Aura.new(auraName, auraDefinition, props)
+
+	-- Set Remote to true if this came from the server
+	aura.Remote = self.IncomingReplication
 
 	if Default(aura.Status.Replicated, true) then
 		self:Sync("Apply", auraName, aura:Snapshot())
@@ -272,9 +274,7 @@ function AuraAgent:CullAuras(dt)
 	for name, aura in pairs(self.ActiveAuras) do
 		aura.Status.TimeLeft = math.max(aura.Status.TimeLeft - dt, 0)
 
-		-- TODO: Track where auras come from, and allow removal of client-applied auras.
-		-- Potentailly Status.Origination = Remote | Local
-		if IsServer and aura.Status.TimeLeft <= 0 then
+		if not aura.Remote and aura.Status.TimeLeft <= 0 then
 			self:Remove(name, "EXPIRED")
 		end
 	end

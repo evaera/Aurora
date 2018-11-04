@@ -256,23 +256,26 @@ The `Status` section may only have specific properties inside, but `Params` and 
 
 Aura properties are all loaded from the Aura definition, overshadowed by any Props specific to this Aura.
 
-#### `Aura.Name: string`
-If this Aura has a custom name, then this is the custom name. Otherwise, it's the same as `Id`.
-
 #### `Aura.Id: string`
 The name of this Aura from its definition.
 
-#### `Aura.Display: dictionary`
-A dictionary where you could include display-related properties such as:
+#### `Aura.Name: string`
+If this Aura has a custom name, then this is the custom name. Otherwise, it's the same as `Id`.
+
+#### `Aura.Remote: boolean`
+On the client, this property is `true` if this Aura originated from the server. On the server, it is always `false`.
+
+#### `Aura.Display?: dictionary`
+An dictionary where you could include display-related properties such as:
 
 - Title
 - Description
 - Icon
 
-#### `Aura.Params: dictionary`
-An optional dictionary where you should include any parameters for Effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
+#### `Aura.Params?: dictionary`
+A dictionary where you should include any parameters for Effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
 
-#### `Aura.Effects: dictionary`
+#### `Aura.Effects?: dictionary`
 A dictionary containing the Effect values/functions for this Aura.
 
 #### `Aura.Status: dictionary`

@@ -87,6 +87,7 @@ function Aura.new(auraName, auraDefinition, props)
 		Name = props.Name or auraName;
 		ChangedProperties = {};
 		Props = props;
+		Remote = false;
 	}, Aura)
 
 	local sectionIndex = MakeShadowedSection(self, auraDefinition, props)

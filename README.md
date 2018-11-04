@@ -325,7 +325,8 @@ Effects are made up of four functions, which are all optional: `Constructor`, `R
 
 Effects may also have these optional properties:
 - `AllowedInstanceTypes` - Table of strings that limits the types of instances that this Effect can be applied to. Aurora will produce a warning if an Effect is applied to an improper instance type, and the Effect wil be discarded. Uses :IsA comparison.
-- `Lazy` - A boolean value that, if true, will only run the `Apply` function if the reduced value changes from its last value.
+- `Lazy` - A boolean value that determines if the `Apply` function should only run if the reduced value changes from its last value.
+  - Optionally, you can provide a function that overrides this behavior named `ShouldApply` in the Effect, which accepts the parameters `self`, `previousReducedValue` (array), and `currentReducedValue` (array). (The last two are sent as arrays because the reducer can return multiple values.) The function should then return a boolean that decides if the `Apply` function is called this update cycle. `Lazy` must still be set to `true` for `ShouldApply` to be called.
 
 ### Definition
 

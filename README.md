@@ -414,11 +414,11 @@ These may only be accessed via the `self` parameter in Effects.
 
 When a player joins the game, a snapshot of every Aura with `Status.Replicated` set to `true` from every Agent on the server is created, serialized, and sent to the player. The player then re-creates the entire world state on their end.
 
-Once a player is connected, all changes (Auras being applied or removed) to replicated Auras are mirrored to all clients in the game. Each client runs its own version of the world, decreasing duration on Auras and updating Effects.
+You can also modify Auras from the client, but be aware that if you work with the same Auras on both the server and the client you could run into world state disagreements. Take care to give your Auras custom names if you want to avoid collision.
 
-All mirrored messages are played back on the client in order. There is a message buffer in the client network system that will hold onto messages that arrive out of order and play them all back correctly so that the server and client should always agree on the world state.
+Once a player is connected, all changes (Auras being applied or removed) to replicated Auras are mirrored to all clients in the game. All mirrored messages are played back on the client in order so that the server and client should always agree on the world state.
 
-You cannot `Apply` or `Remove` any Auras from the client, and attempting to do so will result in an error. Similarly, the client will never remove any Auras when they expire, instead it waits for the server to mirror the Remove message back to the client.
+Each client runs its own version of the world, decreasing duration on Auras and updating Effects. However, the client will never remove any Auras that originated from the server when they expire, instead it waits for the server to mirror the Remove message back to the client. As a result, server-owned Auras may sit at `0` `TimeLeft` for an amount of time.
 
 A mechanism for the client to request an Aura to be cancelled will be implemented at some point.
 

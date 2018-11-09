@@ -302,7 +302,7 @@ If true, this Aura will be sent to all clients. Otherwise, it will only exist on
 The maximum number of stacks this Aura can reach.
 
 #### `Aura.Status.ShouldAuraRefresh?: boolean`
-Whether or not this Aura is allowed to refresh its duration when a new stack is applied (or if unstackable, when it is applied again).
+Whether or not this Aura is allowed to refresh its duration when a new stack is applied (or if unstackable, when it is applied again). True if omitted.
 
 #### `Aura.Status.ServerOnly?: boolean`
 If true, Aurora will throw an error if you attempt to apply this Aura from the client. Mutually exclusive with `Replicated` and `ClientOnly`.

@@ -88,7 +88,7 @@ function AuraAgent:Apply(auraName, props)
 	-- Set Remote to true if this came from the server
 	aura.Remote = self.IncomingReplication
 
-	if Default(aura.Status.Replicated, true) then
+	if aura.Status.Replicated then
 		self:Sync("Apply", auraName, aura:Snapshot())
 	end
 
@@ -163,7 +163,7 @@ function AuraAgent:Consume(auraName, cause)
 			return self:Remove(auraName, cause)
 		end
 
-		if Default(aura.Status.Replicated, true) then
+		if aura.Status.Replicated then
 			self:Sync("Consume", auraName, cause)
 		end
 
@@ -183,7 +183,7 @@ function AuraAgent:Remove(auraName, cause)
 	local aura = self:Get(auraName)
 
 	if aura then
-		if Default(aura.Status.Replicated, true) then
+		if aura.Status.Replicated then
 			self:Sync("Remove", auraName, cause)
 		end
 
@@ -263,7 +263,7 @@ function AuraAgent:Snapshot()
 	local snapshot = {}
 
 	for _, aura in pairs(self.ActiveAuras) do
-		if Default(aura.Status.Replicated, true) then
+		if aura.Status.Replicated then
 			snapshot[aura.Id] = aura:Snapshot()
 		end
 	end

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 local Signal = Resources:LoadLibrary("Signal")
@@ -9,7 +10,8 @@ local Effect = require(script.BaseEffect)
 local Util = require(script.Util)
 
 local Default = Util.Default
-local IsClient = RunService:IsServer() == false -- allow to run in old play solo
+local IsServer = RunService:IsServer()
+local IsClient = RunService:IsClient()
 
 local AuraAgent = {
 	Events = {"AuraAdded", "AuraRemoved", "AuraStackAdded", "AuraStackRemoved", "AuraRefreshed"}
@@ -300,9 +302,11 @@ function AuraAgent:ReifyEffects()
 			table.insert(activeEffects[effectName], effectValue)
 
 			if not self.ActiveEffects[effectName] then
+				local skip = false
 				local effectDefinition = self.EffectList:Find(effectName)
 				if not effectDefinition then
-					return warn(("[Aurora] Attempt to apply invalid effect %q from aura %q"):format(effectName, name))
+					warn(("[Aurora] Attempt to apply invalid effect %q from aura %q"):format(effectName, name))
+					skip = true
 				end
 
 				if effectDefinition.AllowedInstanceTypes then
@@ -315,14 +319,47 @@ function AuraAgent:ReifyEffects()
 					end
 
 					if not allowed then
-						return warn(
+						skip = true
+						warn(
 							("[Aurora] Attempt to apply effect %q on disallowed instance type %q")
 							:format(effectName, self.Instance.ClassName)
 						)
 					end
 				end
 
-				self.ActiveEffects[effectName] = Effect.new(effectName, effectDefinition, self)
+				if effectDefinition.ClientOnly and effectDefinition.ServerOnly then
+					warn(("[Aurora] Effect %q has both ServerOnly and ClientOnly set to true"):format(effectName))
+				end
+
+				if effectDefinition.LocalPlayerOnly then
+					if effectDefinition.ServerOnly then
+						warn(("[Aurora] Effect %q has both LocalPlayerOnly and ServerOnly set to true"):format(effectName))
+						skip = true
+					elseif
+						IsServer
+						or not (
+							self.Instance == Players.LocalPlayer
+							or self.Instance:IsDescendantOf(Players.LocalPlayer)
+							or (
+								Players.LocalPlayer.Character ~= nil
+								and (
+									self.Instance == Players.LocalPlayer.Character
+									or self.Instance:IsDescendantOf(Players.LocalPlayer.Character)
+								)
+							)
+						)
+					then
+						skip = true
+					end
+				end
+
+				if (effectDefinition.ClientOnly and IsServer) or (effectDefinition.ServerOnly and IsClient) then
+					skip = true
+				end
+
+				if not skip then
+					self.ActiveEffects[effectName] = Effect.new(effectName, effectDefinition, self)
+				end
 			end
 		end
 	end

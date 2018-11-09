@@ -11,6 +11,9 @@ local IsStudio = RunService:IsStudio()
 
 local EffectStructure = {
 	AllowedInstanceTypes = t.optional(t.array(t.string));
+	ClientOnly = t.optional(t.boolean);
+	ServerOnly = t.optional(t.boolean);
+	LocalPlayerOnly = t.optional(t.boolean);
 	Lazy = t.optional(t.boolean);
 	Reducer = t.optional(t.callback);
 	ShouldApply = t.optional(t.callback);
@@ -40,7 +43,7 @@ function Effect.new(effectName, effectDefinition, agent)
 
 		for key in pairs(effectDefinition.__keys) do -- __keys comes from the Immutable module
 			if EffectStructure[key] == nil then
-				error(("Unknown key %q in aura %q."):format(key, effectName), 2)
+				error(("Unknown key %q in effect %q."):format(key, effectName), 2)
 			end
 		end
 	end

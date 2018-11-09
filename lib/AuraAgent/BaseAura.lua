@@ -5,6 +5,8 @@ local t = Resources:LoadLibrary("t")
 local Util = require(script.Parent.Util)
 
 local IsStudio = RunService:IsStudio()
+local IsServer = RunService:IsServer()
+local IsClient = RunService:IsClient()
 
 local AuraStructure = {
 	Display = t.optional(t.keys(t.string));
@@ -12,6 +14,8 @@ local AuraStructure = {
 		Duration = t.optional(t.number);
 		Visible = t.optional(t.boolean);
 		Replicated = t.optional(t.boolean);
+		ServerOnly = t.optional(t.boolean);
+		ClientOnly = t.optional(t.boolean);
 		MaxStacks = t.optional(t.number);
 		ShouldAuraRefresh = t.optional(t.boolean);
 	}));
@@ -112,6 +116,16 @@ function Aura.new(auraName, auraDefinition, props)
 				self.ChangedProperties[sectionName][key] = true
 			end
 		end
+	end
+
+	if self.Status.ClientOnly and IsServer then
+		error(("[Aurora] Attempt to apply ClientOnly aura %q on server"):format(self.Id))
+	elseif self.Status.ServerOnly and IsClient then
+		error(("[Aurora] Attempt to apply ServerOnly aura %q on client"):format(self.Id))
+	elseif self.Status.Replicated and (self.Status.ClientOnly or self.Status.ServerOnly) then
+		warn(
+			("[Aurora] Aura %q has both Replicated and ServerOnly/ClientOnly set to true; this does not make sense."):format(self.Id)
+		)
 	end
 
 

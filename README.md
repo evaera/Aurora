@@ -3,7 +3,7 @@
 </div>
 
 
-Current status: Functional and ready for real world application.
+Current status: Pre-release.
 
 # Aurora
 
@@ -304,9 +304,15 @@ The maximum number of stacks this Aura can reach.
 #### `Aura.Status.ShouldAuraRefresh?: boolean`
 Whether or not this Aura is allowed to refresh its duration when a new stack is applied (or if unstackable, when it is applied again).
 
+#### `Aura.Status.ServerOnly?: boolean`
+If true, Aurora will throw an error if you attempt to apply this Aura from the client. Mutually exclusive with `Replicated` and `ClientOnly`.
+
+#### `Aura.Status.ClientOnly?: boolean`
+If true, Aurora will throw an error if you attempt to apply this Aura from the server. Mutually exclusive with `Replicated` and `ServerOnly`.
+
 ### Hooks
 
-Auras also have "Hooks", which are lifecycle methods directly attached to a specific Aura, rather than an Effect. Hooks could be used for things like playing a specific sound when the Aura is applied or removed or showing a notice on a player's screen. However, they shouldn't be used to modify the game world.
+Auras also have "Hooks", which are life cycle methods directly attached to a specific Aura, rather than an Effect. Hooks could be used for things like playing a specific sound when the Aura is applied or removed or showing a notice on a player's screen. However, they shouldn't be used to modify the game world.
 
 Note: Hooks do not fire during the initial world snapshot playback when a player joins the game, so that the player is not flooded with messages and/or sounds.
 
@@ -328,10 +334,13 @@ Effects are made up of four functions, which are all optional: `Constructor`, `R
 - The `Apply` function is called immediately after the Reducer, and it is given whatever `Apply` returned as arguments. This function should actually make a change in the world based on the reduced value it is given. This separation is enforced so that the reduced value can be captured for `Agent:GetLastReducedValue` to work as expected.
 - The `Destructor` is called when there are no longer any Auras providing this Effect. It can be used to clean up any objects that were created in the Constructor.
 
-Effects may also have these optional properties:
+Effect definitions may also have these optional properties:
 - `AllowedInstanceTypes` - Table of strings that limits the types of instances that this Effect can be applied to. Aurora will produce a warning if an Effect is applied to an improper instance type, and the Effect wil be discarded. Uses :IsA comparison.
 - `Lazy` - A boolean value that determines if the `Apply` function should only run if the reduced value changes from its last value.
   - Optionally, you can provide a function that overrides this behavior named `ShouldApply` in the Effect, which accepts the parameters `self`, `previousReducedValue` (array), and `currentReducedValue` (array). (The last two are sent as arrays because the reducer can return multiple values.) The function should then return a boolean that decides if the `Apply` function is called this update cycle. `Lazy` must still be set to `true` for `ShouldApply` to be called.
+- `ServerOnly` - A boolean that determines if this Effect should only run on the server. `ServerOnly` effects are silently ignored on the client.
+- `ClientOnly` - A boolean that determines if this Effect should only run on clients. `ClientOnly` effects are silently ignored on the server.
+- `LocalPlayerOnly` - A boolean that determines if this Effect should only run on the client of the player who is associated with the Agent Instance. The Effect only runs if the Agent Instance is the local client's Player, Player character, or any descendant thereof. `LocalPlayerOnly` effects are silently ignored on other clients and on the server.
 
 ### Definition
 
@@ -387,6 +396,19 @@ return {
   end;
 }
 ```
+
+### Methods
+These may only be accessed via the `self` parameter in Effects.
+
+#### `Effect:GetLastReducedValue(): any`
+
+### Properties
+These may only be accessed via the `self` parameter in Effects.
+
+#### `Effect.Name: string`
+#### `Effect.Agent: Agent`
+#### `Effect.Instance: Instance`
+#### `Effect.Definition: EffectDefinition`
 
 ## Replication
 

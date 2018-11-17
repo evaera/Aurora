@@ -256,7 +256,7 @@ end
 function AuraAgent:Snapshot()
 	CheckDestroy(self)
 
-	if self.TimeInactive > 0 or #self.ActiveAuras == 0 then
+	if self.TimeInactive > 0 then
 		return nil -- return nil when there's nothing to snapshot
 	end
 

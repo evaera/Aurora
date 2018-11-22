@@ -9,7 +9,7 @@ Current status: Pre-release.
 
 **Aurora** is a library that can manage status effects (known as "Auras") in your Roblox game. These Auras are much akin to "buffs" and "debuffs" as seen in many games.
 
-Using Aurora can help you stay sane while managing complex game state when multiple parts of your game need to keep track of or change the same resource. *It's like Redux, but for games!*
+Using Aurora can help you stay sane while managing complex game state when multiple parts of your game need to keep track of or change the same resource.
 
 Aurora is made for and requires [RoStrap](https://rostrap.github.io/), a light weight module management system.
 
@@ -266,6 +266,12 @@ If this Aura has a custom name, then this is the custom name. Otherwise, it's th
 
 #### `Aura.Remote: boolean`
 On the client, this property is `true` if this Aura originated from the server. On the server, it is always `false`.
+
+#### `Aura.Agent: Agent`
+The Agent that this Aura belongs to.
+
+#### `Aura.Instance: Instance`
+The instance that this Aura's Agent is for.
 
 #### `Aura.Display: dictionary`
 An dictionary where you could include display-related properties such as:

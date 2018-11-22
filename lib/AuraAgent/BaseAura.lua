@@ -83,10 +83,12 @@ end
 local Aura = {}
 Aura.__index = Aura
 
-function Aura.new(auraName, auraDefinition, props)
+function Aura.new(auraName, auraDefinition, props, agent)
 	assert(t.tuple(t.string, t.table, t.table)(auraName, auraDefinition, props))
 
 	local self = setmetatable({
+		Agent = agent;
+		Instance = agent and agent.Instance;
 		Id = auraName;
 		Name = props.Name or auraName;
 		ChangedProperties = {};

@@ -83,7 +83,7 @@ function AuraAgent:Apply(auraName, props)
 		return warn(("[Aurora] Attempt to apply invalid aura %q to %s"):format(auraName, self.Instance:GetFullName()))
 	end
 
-	local aura = Aura.new(auraName, auraDefinition, props)
+	local aura = Aura.new(auraName, auraDefinition, props, self)
 
 	-- Set Remote to true if this came from the server
 	aura.Remote = self.IncomingReplication

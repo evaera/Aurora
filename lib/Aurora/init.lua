@@ -92,14 +92,19 @@ end
 function Aurora.Snapshot()
 	local snapshot = {}
 	for instance, agent in pairs(Agents) do
-		local agentSnapshot = agent:Snapshot()
+		if agent.Destroyed then
+			Agents[instance] = nil
+		else
+			local agentSnapshot = agent:Snapshot()
 
-		if agentSnapshot then
-			snapshot[#snapshot + 1] = {
-				Instance = instance;
-				Auras = agentSnapshot;
-			}
+			if agentSnapshot then
+				snapshot[#snapshot + 1] = {
+					Instance = instance;
+					Auras = agentSnapshot;
+				}
+			end
 		end
+
 	end
 	return snapshot
 end

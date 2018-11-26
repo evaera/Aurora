@@ -10,6 +10,7 @@ local IsClient = RunService:IsClient()
 
 local AuraStructure = {
 	Display = t.optional(t.keys(t.string));
+	Config = t.optional(t.keys(t.string));
 	Status = t.optional(t.interface({
 		Duration = t.optional(t.number);
 		Visible = t.optional(t.boolean);
@@ -34,6 +35,7 @@ local REPLICATED_SECTIONS = {
 	Status = true;
 	Params = true;
 	Display = true;
+	Config = true;
 	Effects = true;
 }
 
@@ -99,6 +101,7 @@ function Aura.new(auraName, auraDefinition, props, agent)
 	local sectionIndex = MakeShadowedSection(self, auraDefinition, props)
 	self.Status = setmetatable({}, sectionIndex("Status"))
 	self.Display = setmetatable({}, sectionIndex("Display"))
+	self.Config = setmetatable({}, sectionIndex("Config"))
 	self.Params = setmetatable({}, sectionIndex("Params"))
 	self.Hooks = setmetatable({}, sectionIndex("Hooks"))
 	self.Effects = props.Effects or auraDefinition.Effects -- must be iterable, so apply no shadowing.

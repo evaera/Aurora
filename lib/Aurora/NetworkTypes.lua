@@ -22,6 +22,7 @@ T.ISnapshotPayload = t.interface({
 		Status = t.keys(t.string);
 		Params = t.optional(t.keys(t.string));
 		Display = t.optional(t.keys(t.string));
+		Config = t.optional(t.keys(t.string));
 		Effects = t.optional(t.keys(t.string));
 	}))
 })

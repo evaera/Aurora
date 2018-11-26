@@ -280,6 +280,13 @@ An dictionary where you could include display-related properties such as:
 - Description
 - Icon
 
+#### `Aura.Config: dictionary`
+An dictionary where you could include generic aura-related properties such as:
+
+- Should persist through death
+- Remove on death
+- Should the aura be removed when the player does X
+
 #### `Aura.Params: dictionary`
 A dictionary where you should include any parameters for Effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
 

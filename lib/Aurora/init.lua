@@ -89,13 +89,13 @@ end
 
 --- Creates a snapshot of every agent's auras as they are in this moment
 -- to be sent to a newly connected client (agents with no auras are excluded)
-function Aurora.Serialize()
+function Aurora.Serialize(filter)
 	local snapshot = {}
 	for instance, agent in pairs(Agents) do
 		if agent.Destroyed then
 			Agents[instance] = nil
 		elseif agent.TimeInactive <= 0 then
-			local agentSerialize = agent:Serialize()
+			local agentSerialize = agent:Serialize(filter)
 
 			snapshot[#snapshot + 1] = {
 				Instance = instance;
@@ -123,7 +123,9 @@ if IsServer then
 		end
 		lastRequest[player] = tick()
 
-		return Aurora.Serialize()
+		return Aurora.Serialize(function(aura)
+			return aura.Status.Replicated == true
+		end)
 	end
 	game:GetService("Players").PlayerRemoving:Connect(function(player)
 		lastRequest[player] = nil

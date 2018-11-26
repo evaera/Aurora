@@ -167,12 +167,12 @@ Accepts a dictionary map of Aura name => dictionary of Props, and applies the gi
 
 This function is called internally during network replication, and the output of `Agent:Serialize()` may be fed directly into this function.
 
-#### `Agent:Serialize(): dictionary`
-Returns a serializable "snapshot" of the Auras on this Agent. The built-in Aurora network code uses this function internally in order to replicate the Auras on this agent. 
+#### `Agent:Serialize(filter?: function(aura) => boolean): dictionary`
+Returns a serializable "snapshot" of the Auras on this Agent. Accepts an optional filter function, which should accept a single Aura, and return a boolean that determines if the Aura should be present in the returned dictionary.
 
 It should be noted that this function creates a *static representation* of the Auras on this Agent. Because you can override certain properties with Props in the `Apply` function, special care is taken to replicate these across the network. Aurora tracks which properties you changed with Props and explicitly stores those in the snapshot. Additionally, it is possible to send functions as values in Props in order to return a dynamic value. Because functions are not serializable, function in Props will be ran immediately and their return value will be present inside the snapshot.
 
-You may feed the output of this function directly into `Agent:ApplyAuras` to apply all serialized Auras at once.
+You may feed the output of this function directly into `Agent:ApplyAuras` to apply all serialized Auras at once. The built-in Aurora network code uses this function internally in order to replicate the Auras on this agent.
 
 #### `Agent:Destroy(): void`
 Destroys this Agent, rendering it unusable. All events will be disconnected, Effects will be deconstructed, Auras will be removed, it will no longer be updated or kept in memory internally, and calling any further methods on this Agent will raise an error.

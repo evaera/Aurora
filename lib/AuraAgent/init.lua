@@ -246,13 +246,13 @@ function AuraAgent:Sync(method, ...)
 	end
 end
 
-function AuraAgent:Serialize()
+function AuraAgent:Serialize(filter)
 	CheckDestroy(self)
 
 	local snapshot = {}
 
 	for _, aura in pairs(self.ActiveAuras) do
-		if aura.Status.Replicated then
+		if not filter or filter(aura) then
 			snapshot[aura.Id] = aura:Serialize()
 		end
 	end

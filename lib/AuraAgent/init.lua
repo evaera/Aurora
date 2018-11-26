@@ -309,7 +309,7 @@ function AuraAgent:ReifyEffects()
 					skip = true
 				end
 
-				if effectDefinition.AllowedInstanceTypes then
+				if not skip and effectDefinition.AllowedInstanceTypes then
 					local allowed = false
 					for _, className in ipairs(effectDefinition.AllowedInstanceTypes) do
 						if self.Instance:IsA(className) then

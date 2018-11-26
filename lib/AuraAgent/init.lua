@@ -67,7 +67,11 @@ end
 
 function AuraAgent:Apply(auraName, props)
 	CheckDestroy(self)
-	assert(t.tuple(t.string, t.optional(t.table))(auraName, props))
+	assert(t.tuple(t.string, t.optional(t.union(t.table, t.string)))(auraName, props))
+
+	if type(props) == "string" then
+		props = { Name = props }
+	end
 
 	props = props or {} -- todo type check props
 

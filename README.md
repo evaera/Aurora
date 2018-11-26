@@ -123,6 +123,8 @@ To specify a custom name, pass a property `Name` in as a Prop when applying this
 
 This feature is useful for when you need to add multiple of the same Aura at the same time but with different Params, so adding a stack or refreshing duration wouldn't be appropriate.
 
+As a shorthand, you may also simply send a string in place of a Props table in order to set a custom name succinctly. For example, `agent:Apply("auraName", ":customName")` is shorthand for `agent:Apply("auraName", { Name = ":customName" })`.
+
 Note: Aurora will throw an error if you attempt to apply two *distinct* Auras with the same custom name at the same time.
 
 #### `Agent:Remove(auraName: string, reason = "REMOVED"): boolean`

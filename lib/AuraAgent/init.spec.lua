@@ -285,8 +285,8 @@ return function()
 			local agent = AuraAgent.new(testValue, Auras, Effects)
 			local agent2 = AuraAgent.new(testValue2, Auras, Effects)
 
-			agent:Apply("TestAuraStandard", { Name = ":one" })
-			agent:Apply("TestAuraStackable", { Name = ":two" })
+			agent:Apply("TestAuraStandard", ":one")
+			agent:Apply("TestAuraStackable", ":two")
 
 			agent:CopyAurasTo(agent2, function(aura)
 				return aura.Name == ":one"
@@ -302,8 +302,8 @@ return function()
 			local agent = AuraAgent.new(testValue, Auras, Effects)
 			local agent2 = AuraAgent.new(testValue2, Auras, Effects)
 
-			agent:Apply("TestAuraStandard", { Name = ":one" })
-			agent:Apply("TestAuraStackable", { Name = ":two" })
+			agent:Apply("TestAuraStandard", ":one")
+			agent:Apply("TestAuraStackable", ":two")
 
 			agent:TransferAurasTo(agent2, function(aura)
 				return aura.Name == ":one"

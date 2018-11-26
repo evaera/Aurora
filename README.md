@@ -169,6 +169,9 @@ Accepts a dictionary map of Aura name => dictionary of Props, and applies the gi
 
 This function is called internally during network replication, and the output of `Agent:Serialize()` may be fed directly into this function.
 
+#### `Agent:RemoveAuras(filter?: function(aura) => boolean): boolean`
+Removes all Auras that match the given filter function, or all Auras if no filter function is provided. Returns `true` if at least one Aura was removed.
+
 #### `Agent:Serialize(filter?: function(aura) => boolean): dictionary`
 Returns a serializable "snapshot" of the Auras on this Agent. Accepts an optional filter function, which should accept a single Aura, and return a boolean that determines if the Aura should be present in the returned dictionary.
 

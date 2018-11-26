@@ -1,6 +1,6 @@
 return function()
-	local Auras = require(script.Parent.Parent.Aurora).Auras
-	local Effects = require(script.Parent.Parent.Aurora).Effects
+	local Auras = require(script.Parent.Parent).Auras
+	local Effects = require(script.Parent.Parent).Effects
 	local AuraAgent = require(script.Parent)
 
 	local testValue = Instance.new("NumberValue", workspace)

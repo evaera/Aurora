@@ -10,10 +10,6 @@
       "path": "vendor/testez/lib",
       "target": "TestService.TestEZ"
     },
-    "t": {
-      "path": "vendor/t/lib",
-      "target": "ServerScriptService.Repository.Vendor.t"
-    },
     "demo.server": {
       "path": "demo/demo.server.lua",
       "target": "ServerScriptService.AuroraDemo"

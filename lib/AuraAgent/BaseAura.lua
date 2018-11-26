@@ -1,7 +1,5 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
-local t = Resources:LoadLibrary("t")
+local t = require(script.Parent.Parent.t)
 local Util = require(script.Parent.Util)
 
 local IsStudio = RunService:IsStudio()

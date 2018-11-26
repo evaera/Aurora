@@ -3,7 +3,7 @@ local RunService = game:GetService("RunService")
 local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
 
 local Registerable = require(script.Registerable)
-local AuraAgent = Resources:LoadLibrary("AuraAgent")
+local AuraAgent = require(script.AuraAgent)
 
 local SyncEvent = Resources:GetRemoteEvent(".Aurora")
 local SyncFunction = Resources:GetRemoteFunction(".Aurora")

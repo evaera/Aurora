@@ -1,6 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Resources = require(ReplicatedStorage:WaitForChild("Resources"))
-local t = Resources:LoadLibrary("t")
+local t = require(script.Parent.t)
 
 local T = {}
 

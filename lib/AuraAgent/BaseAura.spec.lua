@@ -1,6 +1,6 @@
 return function()
 	local Aura = require(script.Parent.BaseAura)
-	local Auras = require(script.Parent.Parent.Aurora).Auras
+	local Auras = require(script.Parent.Parent).Auras
 
 	describe("Serialize", function()
 		it("Should send minimal snapshot with no props", function()

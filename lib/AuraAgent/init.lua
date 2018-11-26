@@ -25,13 +25,6 @@ local function CheckDestroy(agent)
 	end
 end
 
--- TODO: Potentially introduce "client-only" flag to Auras and check with this
-local function CheckClient(agent)
-	if IsClient and not agent.IncomingReplication then
-		error("[Aurora] Cannot modify auras from the client", 3)
-	end
-end
-
 function AuraAgent.new(instance, auras, effects, syncCallback)
 	assert(t.tuple(t.Instance, t.table, t.table)(instance, auras, effects))
 

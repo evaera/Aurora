@@ -16,33 +16,9 @@ local function dprint(...)
 end
 
 return function (Aurora)
-	-- AuroraClientNetwork
 	local AuroraClientNetwork = {
-		SyncActionIndex = -1;
-		PendingSince = nil;
-		ActionBuffer = {};
 		Handlers = {}
 	}
-
-	-- Message buffer system ensures all messages arrive in order
-	function AuroraClientNetwork.CheckBuffer()
-		-- If a message is dropped somehow in transmission, skip it after waiting for 5 sec.
-		if AuroraClientNetwork.PendingSince and tick() - AuroraClientNetwork.PendingSince > 5 then
-			AuroraClientNetwork.SyncActionIndex = AuroraClientNetwork.SyncActionIndex + 1
-			AuroraClientNetwork.PendingSince = tick()
-		end
-
-		local nextMessage = AuroraClientNetwork.ActionBuffer[AuroraClientNetwork.SyncActionIndex]
-
-
-		if nextMessage then
-			AuroraClientNetwork.SyncActionIndex = AuroraClientNetwork.SyncActionIndex + 1
-			AuroraClientNetwork.Handlers[nextMessage.Type](nextMessage.Payload)
-			AuroraClientNetwork.CheckBuffer()
-		else
-			AuroraClientNetwork.PendingSince = nil
-		end
-	end
 
 	--[[
 		Possible bug: Client may receive mirrored updates from before it requests the snapshot.
@@ -64,13 +40,7 @@ return function (Aurora)
 				local agent = Aurora.GetAgent(agentPayload.Instance)
 
 				agent.IncomingReplication = true
-				agent.DisableHooks = true
-
-				for auraName, props in pairs(agentPayload.Auras) do
-					agent:Apply(auraName, props)
-				end
-
-				agent.DisableHooks = false
+				agent:ApplySnapshot(agentPayload.Auras)
 				agent.IncomingReplication = false
 			else
 				warn(warning) -- debug
@@ -87,7 +57,7 @@ return function (Aurora)
 
 		-- Replay same method call on client agent
 		local agent = Aurora.GetAgent(payload.Instance)
-		agent.IncomingReplication = true -- tell agent to skip client checks
+		agent.IncomingReplication = true -- tell agent to set Remote
 		agent[payload.Method](agent, unpack(payload.Args))
 		agent.IncomingReplication = false
 
@@ -104,15 +74,6 @@ return function (Aurora)
 		assert(NetworkTypes.INetworkMessage(data))
 		assert(AuroraClientNetwork.Handlers[data.Type] ~= nil)
 
-		if AuroraClientNetwork.SyncActionIndex == -1 then
-			AuroraClientNetwork.SyncActionIndex = data.ActionIndex
-		end
-
-		if not AuroraClientNetwork.PendingSince then
-			AuroraClientNetwork.PendingSince = tick()
-		end
-
-		AuroraClientNetwork.ActionBuffer[data.ActionIndex] = data
-		AuroraClientNetwork.CheckBuffer()
+		AuroraClientNetwork.Handlers[data.Type](data.Payload)
 	end)
 end

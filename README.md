@@ -174,13 +174,13 @@ Returns a serializable "snapshot" of the Auras on this Agent. Accepts an optiona
 
 It should be noted that this function creates a *static representation* of the Auras on this Agent. Because you can override certain properties with Props in the `Apply` function, special care is taken to replicate these across the network. Aurora tracks which properties you changed with Props and explicitly stores those in the snapshot. Additionally, it is possible to send functions as values in Props in order to return a dynamic value. Because functions are not serializable, function in Props will be ran immediately and their return value will be present inside the snapshot.
 
-You may feed the output of this function directly into `Agent:ApplyAuras` to apply all serialized Auras at once. The built-in Aurora network code uses this function internally in order to replicate the Auras on this agent.
+You may feed the output of this function directly into `Agent:ApplyAuras` to apply all serialized Auras at once. The built-in Aurora network code uses this function internally in order to replicate the Auras on this Agent.
 
 #### `Agent:CopyAurasTo(otherAgent: Agent, function(aura) => boolean): void`
 Copies all Auras from this Agent that match the filter function (or all if no filter function is given) to a provided Agent. This function uses `Agent:Serialize()` internally, so all caveats listed above also apply here.
 
 #### `Agent:TransferAurasTo(otherAgent: Agent, function(aura) => boolean): void`
-The same as CopyAurasTo as described above, except that the matching Auras are also removed from this agent in the process.
+The same as CopyAurasTo as described above, except that the matching Auras are also removed from this Agent in the process.
 
 #### `Agent:Destroy(): void`
 Destroys this Agent, rendering it unusable. All events will be disconnected, Effects will be deconstructed, Auras will be removed, it will no longer be updated or kept in memory internally, and calling any further methods on this Agent will raise an error.
@@ -301,11 +301,11 @@ An dictionary where you could include display-related properties such as:
 - Icon
 
 #### `Aura.Config: dictionary`
-An dictionary where you could include generic aura-related properties such as:
+An dictionary where you could include generic Aura-related properties such as:
 
 - Should persist through death
 - Remove on death
-- Should the aura be removed when the player does X
+- Should the Aura be removed when the player does X
 
 #### `Aura.Params: dictionary`
 A dictionary where you should include any parameters for Effects (for example, for an Aura/Effect that increased movement speed, a good property for the Params section would be "Speed")
@@ -450,6 +450,44 @@ Once a player is connected, all changes (Auras being applied or removed) to repl
 
 Each client runs its own version of the world, decreasing duration on Auras and updating Effects. However, the client will never remove any Auras that originated from the server when they expire, instead it waits for the server to mirror the Remove message back to the client. As a result, server-owned Auras may sit at `0` `TimeLeft` for an amount of time.
 
-A mechanism for the client to request an Aura to be cancelled will be implemented at some point.
+The ability to restrict Aura replication to specific players is forthcoming.
 
-The ability to restrict Aura replication to specific players is also forthcoming.
+## Common Mistakes and Anti-Patterns
+
+### Checking for existence before applying or removing Auras
+It is not necessary to check if an Agent has an Aura before removing it. Instead, the `Remove` method returns `true` if it actually did remove an Aura, or `false` if it did not.
+
+```lua
+if ClientAgent:Has(":FieldOfViewRageMode") then -- Unnecessary!
+  ClientAgent:Remove(":FieldOfViewRageMode")
+end
+```
+
+Likewise, it is not necessary to check if an Aura is already present on an Aura before applying it. Instead, you can just call `Apply` again, and the Aura will either refresh duration, add a stack, or do nothing, depending on its configured settings. This is explained in detail under the Agent:Apply documentation.
+
+### Applying many Auras at once
+If you ever catch yourself applying many Auras at once, this should raise some red flags that you're doing something not quite right:
+
+```lua
+-- Not quite right!
+Agent:Apply("MovementDisabled", ":MovementDisabledAttackHandler")
+Agent:Apply("JumpingDisabled", ":JumpingDisabledAttackHandler")
+Agent:Apply("LookingDisabled", ":LookingDisabledAttackHandler")
+Agent:Apply("LeaningDisabled", ":LeaningDisabledAttackHandler")
+```
+
+Auras are meant to model one or more status effects that are grouped together. In this example, the author has made four generic Auras that each provide only one Effect, and is then giving each one a custom name for tracking. This can get unwieldy very quickly!
+
+Instead, the correct solution is to only make one Aura specific to this use case that provides every effect that you need. **Auras should generally have *use-specific* names, while Effects should generally have generic names.**
+
+For example, in this case, the correct solution would be to make one Aura -- perhaps named "Rooted" -- that provides four effects named `"MovementDisabled"`, `"JumpingDisabled"`, `"LookingDisabled"`, and `"LeaningDisabled"`.
+
+### More than one Agent for the same entity
+State related to the same entity (a player, an NPC, or anything really) should only have one Agent. It may be tempting to have one Agent for a player, and another Agent for that player's character -- but this can be a footgun. Falling into this trap can severely complicate state management because it is unclear which Agent certain Effects should operate on -- and can often lead to state duplication.
+
+For example, if you had an Aura that provides two effects, but one of them expects to operate on the character, and the other expects to operate on the player you'd need to get the agent for both and apply the same Aura twice on both Agents. This can quickly get confusing and unmanageable.
+
+Instead, the better solution is to pick *one* -- the player, or the character -- and then add logic and configuration for removing Auras that should not persist through death, or, transferring Auras that should persist to the new Agent. Generally, the recommended approach is to use an Agent for the Player object, and remove non-persistent Auras upon death with the `Agent:RemoveAuras` function, reading an option from the `Config` section that you would create in each Aura's definition.
+
+### Functions in Props
+In Aura definitions, you can provide a function in place of any value type, as long as it returns the expected type. You can also do this when overriding with Props, but it is important to remember that Props are also serialized over the network. If you provide a function value in a Prop, that function will be run on the server immediately as it is replicated, and only its return value will be sent to clients. Sending function values as Props in replicated Auras should be avoided.

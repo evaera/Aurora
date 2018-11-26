@@ -82,7 +82,7 @@ function AuraAgent:Apply(auraName, props)
 	aura.Remote = self.IncomingReplication
 
 	if aura.Status.Replicated then
-		self:Sync("Apply", auraName, aura:Snapshot())
+		self:Sync("Apply", auraName, aura:Serialize())
 	end
 
 	if props.Name and props.Name:sub(1, 1) ~= ":" then
@@ -246,22 +246,30 @@ function AuraAgent:Sync(method, ...)
 	end
 end
 
-function AuraAgent:Snapshot()
+function AuraAgent:Serialize()
 	CheckDestroy(self)
-
-	if self.TimeInactive > 0 then
-		return nil -- return nil when there's nothing to snapshot
-	end
 
 	local snapshot = {}
 
 	for _, aura in pairs(self.ActiveAuras) do
 		if aura.Status.Replicated then
-			snapshot[aura.Id] = aura:Snapshot()
+			snapshot[aura.Id] = aura:Serialize()
 		end
 	end
 
 	return snapshot
+end
+
+function AuraAgent:ApplyAuras(auras, enableHooks)
+	CheckDestroy(self)
+
+	self.DisableHooks = not enableHooks
+
+	for auraName, props in pairs(auras) do
+		self:Apply(auraName, props)
+	end
+
+	self.DisableHooks = false
 end
 
 -- Reduce duration and remove expired auras

@@ -183,7 +183,7 @@ end
 
 --- Returns a set of static props that can be used to re-create this aura as
 -- it is now. Does not include client-derivable properties.
-function Aura:Snapshot()
+function Aura:Serialize()
 	local props = {
 		-- Forward custom name if it doesn't match
 		Name = self.Id ~= self.Name and self.Name or nil;

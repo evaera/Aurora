@@ -2,13 +2,13 @@ return function()
 	local Aura = require(script.Parent.BaseAura)
 	local Auras = require(script.Parent.Parent.Aurora).Auras
 
-	describe("Snapshot", function()
+	describe("Serialize", function()
 		it("Should send minimal snapshot with no props", function()
 			local aura = Aura.new("TestAuraStandard", Auras:Find("TestAuraStandard"), {})
 
 			aura.Status.TimeLeft = 9.8
 
-			local snapshot = aura:Snapshot()
+			local snapshot = aura:Serialize()
 
 			expect(snapshot.Status).to.be.ok()
 			expect(snapshot.Status.TimeLeft).to.equal(9.8)
@@ -29,7 +29,7 @@ return function()
 				}
 			})
 
-			local snapshot = aura:Snapshot()
+			local snapshot = aura:Serialize()
 
 			expect(snapshot.Status).to.be.ok()
 			expect(snapshot.Effects).to.never.be.ok()
@@ -45,7 +45,7 @@ return function()
 				Effects = {}
 			})
 
-			local snapshot = aura:Snapshot()
+			local snapshot = aura:Serialize()
 
 			expect(next(aura.Effects)).to.never.be.ok()
 			expect(snapshot.Effects).to.be.ok()

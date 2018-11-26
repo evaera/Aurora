@@ -29,18 +29,18 @@ return function (Aurora)
 
 	function AuroraClientNetwork.SyncEverything()
 		local snapshot = SyncFunction:InvokeServer()
-		assert(NetworkTypes.ISnapshotShallow(snapshot))
+		assert(NetworkTypes.ISerializeShallow(snapshot))
 
-		dprint("Snapshot:", Debug.Inspect(snapshot))
+		dprint("Serialize:", Debug.Inspect(snapshot))
 
 		for _, agentPayload in pairs(snapshot) do
-			local ok, warning = NetworkTypes.ISnapshotPayload(agentPayload)
+			local ok, warning = NetworkTypes.ISerializePayload(agentPayload)
 
 			if ok then
 				local agent = Aurora.GetAgent(agentPayload.Instance)
 
 				agent.IncomingReplication = true
-				agent:ApplySnapshot(agentPayload.Auras)
+				agent:ApplyAuras(agentPayload.Auras)
 				agent.IncomingReplication = false
 			else
 				warn(warning) -- debug

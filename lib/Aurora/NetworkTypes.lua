@@ -16,7 +16,7 @@ T.ISyncActionPayload = t.interface({
 	Args = t.table;
 })
 
-T.ISnapshotPayload = t.interface({
+T.ISerializePayload = t.interface({
 	Instance = t.Instance;
 	Auras = t.map(t.string, t.interface({
 		Status = t.keys(t.string);
@@ -27,7 +27,7 @@ T.ISnapshotPayload = t.interface({
 	}))
 })
 
-T.ISnapshotDeep = t.array(T.ISnapshotPayload)
-T.ISnapshotShallow = t.array(t.table)
+T.ISerializeDeep = t.array(T.ISerializePayload)
+T.ISerializeShallow = t.array(t.table)
 
 return T

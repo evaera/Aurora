@@ -13,7 +13,6 @@ local AuraStructure = {
 	Config = t.optional(t.keys(t.string));
 	Status = t.optional(t.interface({
 		Duration = t.optional(t.number);
-		Visible = t.optional(t.boolean);
 		Replicated = t.optional(t.boolean);
 		ServerOnly = t.optional(t.boolean);
 		ClientOnly = t.optional(t.boolean);

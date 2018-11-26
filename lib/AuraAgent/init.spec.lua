@@ -31,6 +31,8 @@ return function()
 				};
 				Status = {
 					Duration = math.huge;
+				};
+				Config = {
 					Visible = false;
 				};
 				Params = {
@@ -43,7 +45,7 @@ return function()
 			expect(aura.Display.Title).to.equal("Test Title")
 			expect(aura.Display.Description).to.equal("Test Title!")
 			expect(aura.Status.Duration).to.equal(math.huge)
-			expect(aura.Status.Visible).to.equal(false)
+			expect(aura.Config.Visible).to.equal(false)
 			expect(aura.Params.Speed).to.equal(11)
 			expect(aura.Params.Test).to.equal(59)
 		end)

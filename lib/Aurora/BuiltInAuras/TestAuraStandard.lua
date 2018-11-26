@@ -9,7 +9,6 @@ return {
 
 	Status = {
 		Duration = 10;
-		Visible = true;
 		Replicated = true;
 		ShouldAuraRefresh = true;
 	};

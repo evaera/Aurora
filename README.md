@@ -200,13 +200,13 @@ return {
       :format(100 - math.floor((self.Params.Speed / 16 * 100), self.Status.Duration)
     end;
     Icon = "rbxassetid://1234567";
+    Visible = true;
   };
 
   Status = {
     Duration = function (self)
       return self.Stacks * 5 -- Increase duration with stacks
     end;
-    Visible = true;
     Replicated = true;
     ShouldAuraRefresh = true;
     MaxStacks = 2;
@@ -304,9 +304,6 @@ The number of seconds remaining on this Aura.
 
 #### `Aura.Status.Stacks: number`
 The number of stacks that this Aura has. This always starts at `1`, even for unstackable Auras.
-
-#### `Aura.Status.Visible?: boolean`
-Whether or not this Aura should be visible to the player (such as on a UI)
 
 #### `Aura.Status.Replicated?: boolean`
 If true, this Aura will be sent to all clients. Otherwise, it will only exist on the server.

@@ -50,6 +50,22 @@ return function()
 			expect(aura.Params.Test).to.equal(59)
 		end)
 
+		it("Should error with unknown props keys", function()
+			local agent = AuraAgent.new(testValue, Auras, Effects)
+
+			expect(function()
+				agent:Apply("TestAuraStandard", {
+					Display = {
+						Title = "Test Title";
+						Description = function(self)
+							return self.Display.Title .. "!"
+						end
+					};
+					invalid = true;
+				})
+			end).to.throw()
+		end)
+
 		it("Should fire the AuraAdded event and hook", function()
 			local agent = AuraAgent.new(testValue, Auras, Effects)
 

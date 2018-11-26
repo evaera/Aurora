@@ -40,6 +40,21 @@ local REPLICATED_SECTIONS = {
 
 local IAuraDefinition = t.interface(AuraStructure)
 
+local PropsOnlyStructure = {
+	Name = t.optional(t.string);
+}
+
+local IAuraPropsNonStrict = t.intersection(IAuraDefinition, t.interface(PropsOnlyStructure))
+local function IAuraProps(checkTable)
+	for key in pairs(checkTable) do
+		if PropsOnlyStructure[key] == nil and AuraStructure[key] == nil then
+			return false, string.format("[interface] unexpected field '%s'", key)
+		end
+	end
+
+	return IAuraPropsNonStrict(checkTable)
+end
+
 local function MakeShadowedSection(aura, definition, props)
 	return function (section)
 		return {
@@ -86,6 +101,7 @@ Aura.__index = Aura
 
 function Aura.new(auraName, auraDefinition, props, agent)
 	assert(t.tuple(t.string, t.table, t.table)(auraName, auraDefinition, props))
+	assert(IAuraProps(props))
 
 	local self = setmetatable({
 		Agent = agent;

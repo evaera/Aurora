@@ -10,7 +10,7 @@ local function hookCharacter(character)
 		local agent = Aurora.GetAgent(humanoid)
 
 		wait(2)
-		agent:Apply("Movement", {
+		agent:Apply("TestAuraStackable", {
 			Status = {
 				Duration = 2;
 			}

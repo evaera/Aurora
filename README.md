@@ -11,8 +11,6 @@ Current status: Pre-release.
 
 Using Aurora can help you stay sane while managing complex game state when multiple parts of your game need to keep track of or change the same resource.
 
-Aurora is made for and requires [RoStrap](https://rostrap.github.io/), a light weight module management system.
-
 ## How it works
 
 A classic example of the problem that Aurora aims to solve is changing the player's walk speed. Let's say you have a heavy weapon that you want to have slow down the player when he equips it. That's easy enough, you just set the walk speed when the weapon is equipped, and set it back to default when the weapon is unequipped.
@@ -26,6 +24,13 @@ Aurora solves this problem correctly by allowing you to apply a movement speed A
 Now, there is only one source of truth for the player's WalkSpeed, which solves all of our problems. When there are no longer any Auras that provide the walk speed Effect, Aurora will clean up by setting the player's walk speed back to default.
 
 Of course, this is only one example of what Aurora can be used for. Auras can be used for tracking player state (such as marking a player as "infected" in a zombie game), modifying combat values (such as +10% damage for the next 10 seconds), and as a means of communicating modifiers to the player directly (by directly displaying what Auras a player has on their screen).
+
+## Installation
+### Build in Studio from GitHub
+
+The easiest way to get started with Aurora is to install the [RoStrap Roblox Studio plugin](https://www.roblox.com/library/725884332/RoStrap), open the RoStrap interface in a place, and then install "Aurora". This will instantly download and build the newest version of Aurora right from GitHub.
+
+![Installation](https://user-images.githubusercontent.com/2489210/49001088-9f197900-f129-11e8-98a6-74bda8d5d532.png)
 
 ## House rules
 

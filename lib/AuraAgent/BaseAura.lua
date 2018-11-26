@@ -144,7 +144,9 @@ function Aura.new(auraName, auraDefinition, props, agent)
 		error(("[Aurora] Attempt to apply ServerOnly aura %q on client"):format(self.Id))
 	elseif self.Status.Replicated and (self.Status.ClientOnly or self.Status.ServerOnly) then
 		warn(
-			("[Aurora] Aura %q has both Replicated and ServerOnly/ClientOnly set to true; this does not make sense."):format(self.Id)
+			("[Aurora] Aura %q has both Replicated and ServerOnly/ClientOnly set to true; this does not make sense."):format(
+				self.Id
+			)
 		)
 	end
 

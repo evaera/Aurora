@@ -4,6 +4,7 @@ return function()
 	local AuraAgent = require(script.Parent)
 
 	local testValue = Instance.new("NumberValue", workspace)
+	local testValue2 = Instance.new("NumberValue", workspace)
 
 	describe("AuraAgent:Apply", function()
 		it("Should apply auras", function()
@@ -276,6 +277,42 @@ return function()
 			agent:Update(0.2)
 
 			expect(value).to.equal(testObject.Value)
+		end)
+	end)
+
+	describe("Transfer & Copy", function()
+		it("Should copy Auras from one agent to another", function()
+			local agent = AuraAgent.new(testValue, Auras, Effects)
+			local agent2 = AuraAgent.new(testValue2, Auras, Effects)
+
+			agent:Apply("TestAuraStandard", { Name = ":one" })
+			agent:Apply("TestAuraStackable", { Name = ":two" })
+
+			agent:CopyAurasTo(agent2, function(aura)
+				return aura.Name == ":one"
+			end)
+
+			expect(agent:Has(":one")).to.equal(true)
+			expect(agent:Has(":two")).to.equal(true)
+			expect(agent2:Has(":one")).to.equal(true)
+			expect(agent2:Has(":two")).to.equal(false)
+		end)
+
+		it("Should transfer Auras from one agent to another", function()
+			local agent = AuraAgent.new(testValue, Auras, Effects)
+			local agent2 = AuraAgent.new(testValue2, Auras, Effects)
+
+			agent:Apply("TestAuraStandard", { Name = ":one" })
+			agent:Apply("TestAuraStackable", { Name = ":two" })
+
+			agent:TransferAurasTo(agent2, function(aura)
+				return aura.Name == ":one"
+			end)
+
+			expect(agent:Has(":one")).to.equal(false)
+			expect(agent:Has(":two")).to.equal(true)
+			expect(agent2:Has(":one")).to.equal(true)
+			expect(agent2:Has(":two")).to.equal(false)
 		end)
 	end)
 end

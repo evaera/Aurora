@@ -272,6 +272,20 @@ function AuraAgent:ApplyAuras(auras, enableHooks)
 	self.DisableHooks = false
 end
 
+function AuraAgent:CopyAurasTo(otherAgent, filter)
+	return otherAgent:ApplyAuras(self:Serialize(filter))
+end
+
+function AuraAgent:TransferAurasTo(otherAgent, filter)
+	self:CopyAurasTo(otherAgent, filter)
+
+	for name, aura in pairs(self.ActiveAuras) do
+		if not filter or filter(aura) then
+			self:Remove(name)
+		end
+	end
+end
+
 -- Reduce duration and remove expired auras
 function AuraAgent:CullAuras(dt)
 	for name, aura in pairs(self.ActiveAuras) do

@@ -174,6 +174,12 @@ It should be noted that this function creates a *static representation* of the A
 
 You may feed the output of this function directly into `Agent:ApplyAuras` to apply all serialized Auras at once. The built-in Aurora network code uses this function internally in order to replicate the Auras on this agent.
 
+#### `Agent:CopyAurasTo(otherAgent: Agent, function(aura) => boolean): void`
+Copies all Auras from this Agent that match the filter function (or all if no filter function is given) to a provided Agent. This function uses `Agent:Serialize()` internally, so all caveats listed above also apply here.
+
+#### `Agent:TransferAurasTo(otherAgent: Agent, function(aura) => boolean): void`
+The same as CopyAurasTo as described above, except that the matching Auras are also removed from this agent in the process.
+
 #### `Agent:Destroy(): void`
 Destroys this Agent, rendering it unusable. All events will be disconnected, Effects will be deconstructed, Auras will be removed, it will no longer be updated or kept in memory internally, and calling any further methods on this Agent will raise an error.
 

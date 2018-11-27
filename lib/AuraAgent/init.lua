@@ -73,7 +73,13 @@ function AuraAgent:Apply(auraName, props)
 		props = { Name = props }
 	end
 
-	props = props or {} -- todo type check props
+	props = props or {}
+
+	-- Inline auras
+	if auraName:sub(1, 1) == ":" then
+		props.Name = auraName
+		auraName = "_AuroraInlineAura"
+	end
 
 	local auraDefinition = self.AuraList:Find(auraName)
 	if not auraDefinition then

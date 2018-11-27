@@ -20,6 +20,21 @@ return function()
 			expect(agent:Get("TestAuraStandard").Name).to.equal("TestAuraStandard")
 		end)
 
+		it("Should allow inline auras", function()
+			local agent = AuraAgent.new(testValue, Auras, Effects)
+
+			agent:Apply(":CustomInline", ":CustomInline2")
+			agent:Apply(":InlineWithEffect", {
+				Effects = {
+					TestEffect = true;
+				}
+			})
+
+			expect(agent:Has(":CustomInline")).to.equal(true)
+			expect(agent:HasEffect("TestEffect")).to.equal(true)
+			expect(agent:Get(":InlineWithEffect").Id).to.equal("_AuroraInlineAura")
+		end)
+
 		it("Should merge aura info with given props", function()
 			local agent = AuraAgent.new(testValue, Auras, Effects)
 

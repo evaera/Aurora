@@ -132,6 +132,17 @@ As a shorthand, you may also simply send a string in place of a Props table in o
 
 Note: Aurora will throw an error if you attempt to apply two *distinct* Auras with the same custom name at the same time.
 
+##### Inline Auras
+Sometimes, it's easier to define an Aura inline where you need it instead of defining it in its own file, especially if you're only using a specific set of Effects in one place. If you send a string that begins with a colon (`:`) as the first parameter to `agent:Apply`, this will create a new, blank Aura with its custom name set to what you supplied. Then, you can define the entire Aura contents as Props as the second parameter. However, you should remember that using any functions in Props will be made static upon replication.
+
+```lua
+agent:Apply(":MyInlineAura", {
+  Effects = {
+    SomeEffect = true
+  }
+})
+```
+
 #### `Agent:Remove(auraName: string, reason = "REMOVED"): boolean`
 Removes the Aura of the given name from this Agent. If the given Aura is defined as being replicated, then this method will also mirror over to all clients. Effects are immediately reified after Remove is called.
 

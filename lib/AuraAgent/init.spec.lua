@@ -30,6 +30,8 @@ return function()
 				}
 			})
 
+			agent:ReifyEffects()
+
 			expect(agent:Has(":CustomInline")).to.equal(true)
 			expect(agent:HasEffect("TestEffect")).to.equal(true)
 			expect(agent:Get(":InlineWithEffect").Id).to.equal("_AuroraInlineAura")
@@ -261,6 +263,8 @@ return function()
 			local agent = AuraAgent.new(testObject, Auras, Effects)
 
 			local success = agent:Apply("TestAuraStandard")
+
+			agent:ReifyEffects()
 
 			expect(agent:Get("TestAuraStandard").Status.TimeLeft).to.equal(10)
 			expect(agent:GetLastReducedValue("TestEffect")).to.equal(1)

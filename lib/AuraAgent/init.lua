@@ -41,7 +41,7 @@ function AuraAgent.new(instance, auras, effects, syncCallback)
 		SyncCallback = syncCallback;
 		IncomingReplication = false;
 		DisableHooks = false;
-		Updating = false;
+		ReifyEffectsPending = false;
 	}
 	setmetatable(self, AuraAgent)
 
@@ -143,9 +143,7 @@ function AuraAgent:Apply(auraName, props)
 
 	self.ActiveAuras[auraName] = aura
 
-	if not self.Updating then
-		self:ReifyEffects()
-	end
+	self:ReifyEffectsDeferred()
 
 	return true
 end
@@ -194,9 +192,7 @@ function AuraAgent:Remove(auraName, cause)
 		self.AuraRemoved:Fire(self.ActiveAuras[auraName], cause)
 		self.ActiveAuras[auraName] = nil
 
-		if not self.Updating then
-			self:ReifyEffects()
-		end
+		self:ReifyEffectsDeferred()
 
 		return true
 	end
@@ -315,6 +311,21 @@ function AuraAgent:CullAuras(dt)
 	end
 end
 
+function AuraAgent:ReifyEffectsDeferred()
+	if self.ReifyEffectsPending then
+		return
+	end
+
+	self.ReifyEffectsPending = true
+
+	local connection
+	connection = RunService.Heartbeat:Connect(function()
+		connection:Disconnect()
+		self.ReifyEffectsPending = false
+		self:ReifyEffects()
+	end)
+end
+
 -- Creates/deletes effects based on current auras
 function AuraAgent:ReifyEffects()
 	local activeEffects = {}
@@ -411,12 +422,7 @@ end
 function AuraAgent:Update(dt)
 	CheckDestroy(self)
 
-	self.Updating = true
-
 	self:CullAuras(dt)
-	self:ReifyEffects()
-
-	self.Updating = false
 
 	if next(self.ActiveAuras) == nil then
 		self.TimeInactive = self.TimeInactive + dt

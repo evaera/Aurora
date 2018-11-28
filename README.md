@@ -199,6 +199,9 @@ Copies all Auras from this Agent that match the filter function (or all if no fi
 #### `Agent:TransferAurasTo(otherAgent: Agent, function(aura) => boolean): void`
 The same as CopyAurasTo as described above, except that the matching Auras are also removed from this Agent in the process.
 
+#### `Agent:ReifyEffects(): void`
+Recalculates all active Effects from the current set of Auras, and runs their Reducer/Apply methods. This function is run automatically whenever you run `agent:Apply` and `agent:Remove`, but it is deferred to the end of the frame as an optimization. You should only use this function if you need to update active Effects immediately.
+
 #### `Agent:Destroy(): void`
 Destroys this Agent, rendering it unusable. All events will be disconnected, Effects will be deconstructed, Auras will be removed, it will no longer be updated or kept in memory internally, and calling any further methods on this Agent will raise an error.
 

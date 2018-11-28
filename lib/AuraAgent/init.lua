@@ -312,22 +312,22 @@ function AuraAgent:CullAuras(dt)
 end
 
 function AuraAgent:ReifyEffectsDeferred()
-	if self.ReifyEffectsPending then
+	if self.ReifyEffectsConnection then
 		return
 	end
 
-	self.ReifyEffectsPending = true
-
-	local connection
-	connection = RunService.Heartbeat:Connect(function()
-		connection:Disconnect()
-		self.ReifyEffectsPending = false
+	self.ReifyEffectsConnection = RunService.Heartbeat:Connect(function()
 		self:ReifyEffects()
 	end)
 end
 
 -- Creates/deletes effects based on current auras
 function AuraAgent:ReifyEffects()
+	if self.ReifyEffectsConnection then
+		self.ReifyEffectsConnection:Disconnect()
+		self.ReifyEffectsConnection = nil
+	end
+
 	local activeEffects = {}
 
 	-- Examine effects provided by current auras, and create missing effects.

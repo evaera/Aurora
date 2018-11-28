@@ -12,7 +12,6 @@ local EffectStructure = {
 	ClientOnly = t.optional(t.boolean);
 	ServerOnly = t.optional(t.boolean);
 	LocalPlayerOnly = t.optional(t.boolean);
-	Lazy = t.optional(t.boolean);
 	Reducer = t.optional(t.callback);
 	ShouldApply = t.optional(t.callback);
 	Apply = t.optional(t.callback);
@@ -76,8 +75,7 @@ function Effect:ReduceAndApply(values)
 	end
 
 	if
-		self.Definition.Lazy
-		and not (self.Definition.ShouldApply or defaultShouldApply)(self, previousReducedValue, self.LastReducedValue)
+		not (self.Definition.ShouldApply or defaultShouldApply)(self, self.LastReducedValue, previousReducedValue)
 	then
 		return
 	end

@@ -1,6 +1,5 @@
 return {
 	AllowedInstanceTypes = {"NumberValue"};
-	Lazy = true;
 
 	Reducer = function (_, values)
 		return #values

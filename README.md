@@ -17,7 +17,7 @@ A classic example of the problem that Aurora aims to solve is changing the playe
 
 But what if you want something else to change the player's walk speed as well, potentially at the same time? For example, in addition to the heavy weapon, say the player could equip a shield which also slows them down a bit. If we follow the same flow as when we implemented the logic for the heavy weapon above, we now have a problem: The player can equip both the heavy weapon and the shield, and then unequip the heavy weapon. Now, the player can walk around at full speed with a shield up when they should still be slowed!
 
-Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide the movement speed altering *Effect*, each of which can have different intensities. Then, every update cycle, Aurora will group all similar *Effects* and feed all of their values into a single reducer function. In this case, the function will find the lowest value from all of the Auras, and then the player's WalkSpeed will be set to that number.
+Aurora solves this problem correctly by allowing you to apply a movement speed Aura from each of your equipped items. Each Aura would then provide the movement speed altering *Effect*, each of which can have different intensities. Then, every time an Aura is added or removed, Aurora will group all similar *Effects* and feed all of their values into a single reducer function. In this case, the function will find the lowest value from all of the Auras, and then the player's WalkSpeed will be set to that number.
 
 <img src="assets/Diagram.svg" alt="Aurora" />
 
@@ -64,9 +64,7 @@ ModuleScripts under the container with an Aura name appended with "Server" (case
 See *RegisterAurasIn* just above. Everything is exactly the same. Except, of course, that ModuleScripts inside these containers must export Effects, not Auras.
 
 #### `Aurora.SetTickRate(seconds: number): void`
-Sets how often, in seconds, that all Auras and Effects will be updated. "Updating" in this context refers to lowering remaining duration on Auras, removing expired Auras, and most importantly calling the "Reducer" and "Apply" methods on Effects.
-
-The default value is `0.5` seconds.
+Sets how often, in seconds, that all Auras will have their `TimeLeft` property reduced. The default value is `0.5` seconds.
 
 #### `Aurora.SetMaxAgentTimeInactive(seconds: number): void`
 Sets how long, in seconds, that an Agent can exist without any Auras before it is automatically destroyed on the next update cycle. You should set this if you intend to have a large number of instances with Auras that remain in the game world for a long time. This feature will make the initial Aurora snapshot sent to newly joined players less expensive, make the update cycle slightly less expensive, and free up memory.
@@ -101,7 +99,7 @@ When a player first joins a server, a *snapshot* of every replicated Aura on eve
 
 An Agent is an object that keeps track of Auras and Effects on behalf of the Instance that it is linked to. When it comes time to apply, remove, or otherwise alter the Auras that are applied to a specific Instance, you do so through its Agent. Each Instance will only ever have one Agent, and the Aurora library will be sure to keep track of this for you and always return the same one when called on the same Instance (unless the previous one was destroyed).
 
-Agents also handle updating the state of each Aura attached to it, which happens every update cycle. The frequency of the update cycle is configurable by the developer.
+Agents also handle updating the state of each Aura attached to it, which happens every time an Aura is added or removed.
 
 ### Methods
 #### `Agent:Apply(auraName: string, props?: dictionary): boolean`
@@ -375,18 +373,17 @@ Note: Hooks do not fire during the initial world snapshot playback when a player
 
 Auras can provide Effects (with various parameters), which are used to actually make changes to the world. Effects are explicitly defined by the developer just like Auras. Unlike Auras, however, an Effect can only exist once per Agent, and they are automatically created and destroyed based on what Effects are provided by the current set of Auras.
 
-Effects are made up of four functions, which are all optional: `Constructor`, `Reducer`, `Apply`, and `Destructor`.
+Effects are made up of a few functions, which are all optional:
 
 - The `Constructor` is called whenever one of the Auras starts providing this Effect. It can be used to create any necessary objects needed to enact or display this Effect.
   - For example, if you want to display a "dizzy" indicator above a player when they are stunned, this function could create that and put it inside the character.
-- The `Reducer` is called every update cycle, and takes in any parameters given by Auras which are providing this Effect as an array. It is then this function's job to *reduce* these values into one value and then return it.
+- The `Reducer` is called every time Auras providing this effect are added or removed, and takes in any parameters given by Auras which are providing this Effect as an array. It is then this function's job to *reduce* these values into one value and then return it.
 - The `Apply` function is called immediately after the Reducer, and it is given whatever `Apply` returned as arguments. This function should actually make a change in the world based on the reduced value it is given. This separation is enforced so that the reduced value can be captured for `Agent:GetLastReducedValue` to work as expected.
 - The `Destructor` is called when there are no longer any Auras providing this Effect. It can be used to clean up any objects that were created in the Constructor.
+- `ShouldApply`, which can override the default behavior of directly comparing the last reduced value with the current to decide if Apply should be called. `ShouldApply` accepts the parameters `self`, `currentReducedValue` (array), and `previousReducedValue` (array). (The last two are sent as arrays because the reducer can return multiple values.) The function should then return a boolean that decides if the `Apply` function is called following the Reducer.
 
 Effect definitions may also have these optional properties:
 - `AllowedInstanceTypes` - Table of strings that limits the types of instances that this Effect can be applied to. Aurora will produce a warning if an Effect is applied to an improper instance type, and the Effect wil be discarded. Uses :IsA comparison.
-- `Lazy` - A boolean value that determines if the `Apply` function should only run if the reduced value changes from its last value.
-  - Optionally, you can provide a function that overrides this behavior named `ShouldApply` in the Effect, which accepts the parameters `self`, `previousReducedValue` (array), and `currentReducedValue` (array). (The last two are sent as arrays because the reducer can return multiple values.) The function should then return a boolean that decides if the `Apply` function is called this update cycle. `Lazy` must still be set to `true` for `ShouldApply` to be called.
 - `ServerOnly` - A boolean that determines if this Effect should only run on the server. `ServerOnly` effects are silently ignored on the client.
 - `ClientOnly` - A boolean that determines if this Effect should only run on clients. `ClientOnly` effects are silently ignored on the server.
 - `LocalPlayerOnly` - A boolean that determines if this Effect should only run on the client of the player who is associated with the Agent Instance. The Effect only runs if the Agent Instance is the local client's Player, Player character, or any descendant thereof. `LocalPlayerOnly` effects are silently ignored on other clients and on the server.
@@ -410,8 +407,8 @@ return {
     self.SpecialEffectPart.Parent = self.Instance.Parent
   end;
 
-  -- This function is called every update cycle for as long as the Effect is
-  -- active on this Agent.
+  -- This function gathers all values provided by the current set of Auras
+  -- providing this Effect.
   Reducer = function (self, values)
     -- `values` is an array containing the resolved value from every Aura that
     -- is providing this Effect. Here, we need to take all of these values and

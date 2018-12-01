@@ -413,8 +413,8 @@ function AuraAgent:ReifyEffects()
 		if activeEffects[name] then
 			effect:ReduceAndApply(activeEffects[name])
 		else
-			effect:Destruct()
 			self.ActiveEffects[name] = nil
+			effect:Destruct()
 		end
 	end
 end

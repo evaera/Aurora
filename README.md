@@ -2,8 +2,7 @@
     <img src="assets/Aurora.png" alt="Aurora" height="139" />
 </div>
 
-
-Current status: Pre-release.
+> I recommend checking out [Rocs](https://freshlysqueezednerds.github.io/Rocs/#rocs) which will be replacing Aurora in all of my projects as soon as it's ready for production. Rocs solves the same problems that Aurora solves, but with less assumptions and more flexibility.
 
 # Aurora
 
